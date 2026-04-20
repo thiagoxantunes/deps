@@ -2,26 +2,43 @@ export const revalidate = 60
 
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Plus, TrendingDown, Pencil, Trash2 } from 'lucide-react'
+import { Plus, TrendingDown, Pencil } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { formatCurrency } from '@/utils/cn'
 import SaidaDeleteButton from './SaidaDeleteButton'
 
+const MESES = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
 export default async function SaidasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ano?: string; mes?: string }>
+  searchParams: Promise<{ ano?: string; mes?: string; dia?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
   const now = new Date()
+
   const ano = params.ano || String(now.getFullYear())
   const mes = params.mes || String(now.getMonth() + 1)
+  const dia = params.dia || ''
 
-  const start = `${ano}-${mes.padStart(2, '0')}-01`
-  const lastDay = new Date(Number(ano), Number(mes), 0).getDate()
-  const end = `${ano}-${mes.padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+  // Monta intervalo de datas
+  let start: string
+  let end: string
+
+  if (dia) {
+    const d = dia.padStart(2, '0')
+    const m = mes.padStart(2, '0')
+    start = `${ano}-${m}-${d}`
+    end = `${ano}-${m}-${d}`
+  } else {
+    const m = mes.padStart(2, '0')
+    const lastDay = new Date(Number(ano), Number(mes), 0).getDate()
+    start = `${ano}-${m}-01`
+    end = `${ano}-${m}-${String(lastDay).padStart(2, '0')}`
+  }
 
   const { data: saidas } = await supabase
     .from('saidas')
@@ -29,12 +46,18 @@ export default async function SaidasPage({
     .gte('data', start)
     .lte('data', end)
     .order('data', { ascending: false })
+    .order('horario', { ascending: false })
 
   const total = (saidas || []).reduce((s, r) => s + (r.valor || 0), 0)
 
-  const MESES = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
   const ANOS = Array.from({ length: 6 }, (_, i) => now.getFullYear() - 2 + i)
+  const lastDayOfMonth = new Date(Number(ano), Number(mes), 0).getDate()
+  const DIAS = Array.from({ length: lastDayOfMonth }, (_, i) => i + 1)
+
+  // Label do período
+  const periodoLabel = dia
+    ? `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
+    : `${MESES[Number(mes)]} ${ano}`
 
   return (
     <div className="space-y-6">
@@ -46,7 +69,7 @@ export default async function SaidasPage({
             Saídas
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {(saidas || []).length} despesa{(saidas || []).length !== 1 ? 's' : ''} — {MESES[Number(mes)]} {ano}
+            {(saidas || []).length} despesa{(saidas || []).length !== 1 ? 's' : ''} — {periodoLabel}
           </p>
         </div>
         <Link href="/saidas/nova">
@@ -57,7 +80,7 @@ export default async function SaidasPage({
         </Link>
       </div>
 
-      {/* Filtro Mês/Ano */}
+      {/* Filtros Dia / Mês / Ano */}
       <Card>
         <form className="flex flex-wrap items-end gap-3">
           <div>
@@ -70,6 +93,7 @@ export default async function SaidasPage({
               {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
+
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Mês</label>
             <select
@@ -82,12 +106,36 @@ export default async function SaidasPage({
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Dia</label>
+            <select
+              name="dia"
+              defaultValue={dia}
+              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              <option value="">Todos</option>
+              {DIAS.map(d => (
+                <option key={d} value={d}>{String(d).padStart(2, '0')}</option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="submit"
             className="px-4 py-2 rounded-lg bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 text-sm font-medium hover:opacity-90 transition-opacity"
           >
             Filtrar
           </button>
+
+          {(dia) && (
+            <Link
+              href={`/saidas?ano=${ano}&mes=${mes}`}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Limpar dia
+            </Link>
+          )}
         </form>
       </Card>
 
@@ -98,7 +146,7 @@ export default async function SaidasPage({
           <div>
             <p className="text-xs text-red-600 dark:text-red-400 font-semibold uppercase tracking-wider">Total de Saídas</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(total)}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{MESES[Number(mes)]} {ano}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{periodoLabel}</p>
           </div>
         </div>
       )}
@@ -108,7 +156,7 @@ export default async function SaidasPage({
         <Card>
           <div className="text-center py-12">
             <TrendingDown className="w-12 h-12 mx-auto text-gray-200 dark:text-gray-700 mb-3" />
-            <p className="text-gray-500 dark:text-gray-400 font-medium">Nenhuma saída em {MESES[Number(mes)]} {ano}</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">Nenhuma saída em {periodoLabel}</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Clique em "Registrar Saída" para adicionar uma despesa.</p>
           </div>
         </Card>
@@ -141,9 +189,7 @@ export default async function SaidasPage({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{s.descricao}</p>
                   {conta && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      {conta.nome}
-                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{conta.nome}</p>
                   )}
                 </div>
 
