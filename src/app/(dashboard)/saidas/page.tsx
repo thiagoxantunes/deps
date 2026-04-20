@@ -122,14 +122,17 @@ export default async function SaidasPage({
                 key={s.id}
                 className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-red-200 dark:hover:border-red-800 transition-colors"
               >
-                {/* Data */}
-                <div className="w-12 flex-shrink-0 text-center">
+                {/* Data + Horário */}
+                <div className="w-14 flex-shrink-0 text-center">
                   <p className="text-lg font-bold text-gray-900 dark:text-white leading-none">
                     {String(new Date(s.data + 'T12:00:00').getDate()).padStart(2, '0')}
                   </p>
                   <p className="text-[10px] text-gray-400 uppercase">
                     {new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR', { month: 'short' })}
                   </p>
+                  {s.horario && (
+                    <p className="text-[10px] text-gray-400 mt-0.5">{s.horario}</p>
+                  )}
                 </div>
 
                 <div className="w-px h-10 bg-gray-200 dark:bg-gray-700 flex-shrink-0" />

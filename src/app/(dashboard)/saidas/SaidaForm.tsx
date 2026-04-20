@@ -14,6 +14,7 @@ interface SaidaFormProps {
   saida?: {
     id: string
     data: string
+    horario: string | null
     descricao: string
     valor: number
     conta_id: string | null
@@ -37,6 +38,7 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
   const [contas, setContas] = useState<{ id: string; nome: string }[]>([])
   const [form, setForm] = useState({
     data: saida?.data || new Date().toISOString().split('T')[0],
+    horario: saida?.horario || new Date().toTimeString().slice(0, 5),
     descricao: saida?.descricao || '',
     valor: saida?.valor ? String(saida.valor) : '',
     conta_id: saida?.conta_id || '',
@@ -74,6 +76,7 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
 
     const data = {
       data: form.data,
+      horario: form.horario || null,
       descricao: form.descricao.trim(),
       valor,
       conta_id: form.conta_id || null,
@@ -107,7 +110,7 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
       {/* Data + Valor */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">Dados da Saída</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Input
             id="data"
             type="date"
@@ -115,6 +118,13 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
             value={form.data}
             onChange={e => set('data', e.target.value)}
             error={errors.data}
+          />
+          <Input
+            id="horario"
+            type="time"
+            label="Horário do pagamento"
+            value={form.horario}
+            onChange={e => set('horario', e.target.value)}
           />
           <Input
             id="valor"
