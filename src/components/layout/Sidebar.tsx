@@ -3,7 +3,7 @@
 import { cn } from '@/utils/cn'
 import {
   LayoutDashboard, Users, Car, FileText, Search,
-  LogOut, Moon, Sun, Menu, X, ChevronRight, BarChart2, RefreshCw, MessageCircle, Wallet, TrendingDown
+  LogOut, Moon, Sun, Menu, X, ChevronRight, BarChart2, RefreshCw, MessageCircle, Wallet, TrendingDown, Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -23,6 +23,7 @@ const navItems = [
   { href: '/saidas', icon: TrendingDown, label: 'Saídas' },
   { href: '/relatorios', icon: BarChart2, label: 'Relatórios' },
   { href: '/busca', icon: Search, label: 'Busca' },
+  { href: '/landing', icon: Globe, label: 'Landing Page' },
 ]
 
 interface SidebarProps {

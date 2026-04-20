@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thiago Antunes | Assessoria de Trânsito — Despachante</title>
+  <meta name="description" content="Transferência de veículo, recurso de multas, licenciamento e muito mais. Resolva tudo pelo WhatsApp com Thiago Antunes Assessoria de Trânsito." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --yellow:#FFD600; --yellow-dk:#E6C200; --orange:#FF6B00;
+      --black:#0A0A0A; --surface:#141414; --surface2:#1E1E1E;
+      --border:rgba(255,255,255,0.08); --muted:#888; --white:#FFFFFF;
+      --green:#22C55E; --green-wa:#25D366;
+      --r-sm:12px; --r-md:18px; --r-lg:28px;
+      --transition:0.25s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior:smooth; font-size:16px; }
+    body { font-family:'Inter',sans-serif; background:var(--black); color:var(--white); overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+    img { display:block; max-width:100%; }
+    a { text-decoration:none; color:inherit; }
+    button { cursor:pointer; font-family:inherit; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--surface); }
+    ::-webkit-scrollbar-thumb { background:var(--yellow); border-radius:99px; }
+
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @keyframes pulseBadge { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)} 50%{box-shadow:0 0 0 10px rgba(34,197,94,0)} }
+    @keyframes slideRight { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .6s ease,transform .6s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* ── NAVBAR ── */
+    #navbar { position:fixed; top:0; left:0; right:0; z-index:1000; height:72px; display:flex; align-items:center; padding:0 5%; transition:background var(--transition),backdrop-filter var(--transition),box-shadow var(--transition); }
+    #navbar.scrolled { background:rgba(10,10,10,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:0 1px 0 var(--border); }
+    .nav-inner { width:100%; max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
+    .logo { display:flex; align-items:center; gap:12px; }
+    .logo-cone { width:38px; flex-shrink:0; }
+    .logo-text { line-height:1; }
+    .logo-text .sub { font-size:.6rem; font-weight:500; color:var(--yellow); letter-spacing:3px; text-transform:uppercase; }
+    .logo-text .name { font-family:'Montserrat',sans-serif; font-size:1.25rem; font-weight:900; color:var(--white); letter-spacing:.5px; text-transform:uppercase; }
+    .logo-text .name span { color:var(--yellow); }
+    .logo-text .tag { font-size:.5rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+    .nav-links { display:flex; align-items:center; gap:2rem; list-style:none; }
+    .nav-links a { font-size:.875rem; font-weight:500; color:rgba(255,255,255,.65); transition:color var(--transition); }
+    .nav-links a:hover { color:var(--yellow); }
+
+    .btn { display:inline-flex; align-items:center; gap:8px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.875rem; padding:.65rem 1.5rem; border-radius:99px; transition:all var(--transition); border:none; white-space:nowrap; }
+    .btn svg { width:16px; height:16px; flex-shrink:0; }
+    .btn-wa { background:var(--green-wa); color:var(--white); }
+    .btn-wa:hover { background:#1ebe5d; transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,211,102,.35); }
+    .btn-outline { background:transparent; color:var(--white); border:1.5px solid var(--border); }
+    .btn-outline:hover { border-color:var(--yellow); color:var(--yellow); }
+    .btn-lg { padding:1rem 2rem; font-size:1rem; }
+    .btn-black { background:var(--black); color:var(--white); }
+    .btn-black:hover { background:#222; transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.3); }
+
+    /* ── HERO ── */
+    #hero { min-height:100svh; display:grid; place-items:center; position:relative; overflow:hidden; background:var(--black); padding:72px 5% 0; }
+    .hero-glow { position:absolute; border-radius:50%; pointer-events:none; }
+    .hero-glow-1 { width:700px; height:700px; top:-200px; right:-200px; background:radial-gradient(circle,rgba(255,214,0,.12) 0%,transparent 70%); }
+    .hero-glow-2 { width:500px; height:500px; bottom:-100px; left:-100px; background:radial-gradient(circle,rgba(255,107,0,.10) 0%,transparent 70%); }
+    .hero-grid { position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 0%,transparent 100%); }
+    .hero-inner { position:relative; z-index:2; max-width:1200px; width:100%; display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; padding:4rem 0; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.25); color:var(--green); font-size:.78rem; font-weight:600; padding:6px 14px; border-radius:99px; margin-bottom:1.5rem; animation:pulseBadge 2.5s infinite; }
+    .hero-badge .dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+    .hero-title { font-family:'Montserrat',sans-serif; font-size:clamp(2.4rem,5vw,4rem); font-weight:900; line-height:1.05; color:var(--white); margin-bottom:1.25rem; letter-spacing:-1px; }
+    .hero-title .highlight { color:var(--yellow); position:relative; display:inline-block; }
+    .hero-title .highlight::after { content:''; position:absolute; left:0; bottom:-4px; width:100%; height:3px; background:var(--orange); border-radius:99px; transform-origin:left; animation:slideRight .8s .6s ease both; }
+    .hero-desc { font-size:1.05rem; color:rgba(255,255,255,.6); line-height:1.8; margin-bottom:2rem; max-width:460px; }
+    .hero-ctas { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3rem; }
+    .hero-phones { display:flex; gap:1.5rem; flex-wrap:wrap; }
+    .hero-phone-item { display:flex; align-items:center; gap:8px; font-size:.875rem; color:rgba(255,255,255,.5); }
+    .hero-phone-item a { font-weight:600; color:var(--white); transition:color var(--transition); }
+    .hero-phone-item a:hover { color:var(--yellow); }
+    .hero-phone-item svg { width:14px; height:14px; color:var(--muted); }
+    .hero-visual { position:relative; display:flex; justify-content:center; align-items:center; }
+    .hero-cone-main { animation:float 4s ease-in-out infinite; filter:drop-shadow(0 30px 60px rgba(255,107,0,.4)); width:min(280px,60vw); }
+    .floating-card { position:absolute; background:rgba(255,255,255,.05); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.1); border-radius:var(--r-md); padding:14px 18px; display:flex; align-items:center; gap:10px; }
+    .floating-card.card-a { top:5%; right:-5%; animation:float 5s .5s ease-in-out infinite; }
+    .floating-card.card-b { bottom:10%; left:-5%; animation:float 4.5s 1s ease-in-out infinite; }
+    .floating-card.card-c { top:50%; right:-8%; animation:float 5.5s .25s ease-in-out infinite; }
+    .fc-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .fc-icon.green { background:rgba(34,197,94,.2); }
+    .fc-icon.yellow { background:rgba(255,214,0,.2); }
+    .fc-icon.orange { background:rgba(255,107,0,.2); }
+    .fc-text .fc-label { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+    .fc-text .fc-value { font-size:.875rem; font-weight:700; color:var(--white); }
+
+    /* ── STATS ── */
+    #stats { background:var(--yellow); padding:2rem 5%; }
+    .stats-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; gap:1rem; align-items:center; }
+    .stat-item { text-align:center; padding:.5rem; }
+    .stat-number { font-family:'Montserrat',sans-serif; font-size:clamp(2rem,4vw,3rem); font-weight:900; color:var(--black); line-height:1; }
+    .stat-label { font-size:.8rem; font-weight:600; color:rgba(0,0,0,.6); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+    .stat-divider { width:1px; background:rgba(0,0,0,.15); align-self:stretch; }
+
+    /* ── SECTIONS ── */
+    section { padding:6rem 5%; }
+    .section-eyebrow { display:inline-block; font-size:.75rem; font-weight:700; color:var(--yellow); letter-spacing:4px; text-transform:uppercase; margin-bottom:.75rem; }
+    .section-title { font-family:'Montserrat',sans-serif; font-size:clamp(1.75rem,3.5vw,2.75rem); font-weight:900; color:var(--white); line-height:1.15; letter-spacing:-.5px; }
+    .section-title span { color:var(--yellow); }
+    .section-sub { font-size:1rem; color:var(--muted); margin-top:.75rem; line-height:1.7; }
+    .section-head { max-width:560px; margin-bottom:3.5rem; }
+
+    /* ── SERVICES ── */
+    #servicos { background:var(--surface); border-top:1px solid var(--border); }
+    .services-inner { max-width:1200px; margin:0 auto; }
+    .services-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:3rem; gap:2rem; }
+    .services-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1px; background:var(--border); border-radius:var(--r-lg); overflow:hidden; }
+    .service-card { background:var(--surface); padding:2rem; transition:background var(--transition); position:relative; overflow:hidden; }
+    .service-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,214,0,.06),transparent 60%); opacity:0; transition:opacity var(--transition); }
+    .service-card:hover { background:var(--surface2); }
+    .service-card:hover::before { opacity:1; }
+    .service-card:hover .s-icon { transform:scale(1.1) rotate(-5deg); }
+    .s-icon { font-size:1.75rem; margin-bottom:1rem; display:block; transition:transform var(--transition); }
+    .service-card h3 { font-family:'Montserrat',sans-serif; font-size:.95rem; font-weight:800; color:var(--white); margin-bottom:.4rem; }
+    .service-card p { font-size:.82rem; color:var(--muted); line-height:1.6; }
+    .s-arrow { display:none; }
+
+    /* ── HOW IT WORKS ── */
+    #como-funciona { background:var(--black); }
+    .steps-wrapper { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+    .step { display:flex; gap:1.5rem; padding:2rem 0; border-bottom:1px solid var(--border); cursor:default; }
+    .step:last-child { border-bottom:none; }
+    .step:first-child { padding-top:0; }
+    .step-num { font-family:'Montserrat',sans-serif; font-size:3rem; font-weight:900; color:rgba(255,214,0,.12); line-height:1; min-width:52px; transition:color var(--transition); }
+    .step:hover .step-num { color:var(--yellow); }
+    .step-content h3 { font-family:'Montserrat',sans-serif; font-size:1rem; font-weight:800; color:var(--white); margin-bottom:.4rem; }
+    .step-content p { font-size:.875rem; color:var(--muted); line-height:1.7; }
+    .steps-cta-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:3rem; display:flex; flex-direction:column; gap:2rem; position:relative; overflow:hidden; }
+    .steps-cta-box::before { content:''; position:absolute; top:-80px; right:-80px; width:300px; height:300px; background:radial-gradient(circle,rgba(255,214,0,.08),transparent 70%); pointer-events:none; }
+    .steps-cta-box .big-cone { font-size:5rem; line-height:1; text-align:center; }
+    .steps-cta-box h3 { font-family:'Montserrat',sans-serif; font-size:1.5rem; font-weight:900; color:var(--white); text-align:center; }
+    .steps-cta-box p { font-size:.9rem; color:var(--muted); text-align:center; line-height:1.7; }
+    .steps-cta-phones { display:flex; flex-direction:column; gap:.75rem; }
+    .steps-phone-btn { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:var(--r-md); padding:.9rem 1.2rem; color:var(--white); font-weight:600; font-size:.95rem; transition:all var(--transition); }
+    .steps-phone-btn:hover { background:rgba(37,211,102,.1); border-color:rgba(37,211,102,.3); transform:translateX(4px); }
+    .steps-phone-btn .ph-icon { width:36px; height:36px; border-radius:10px; background:var(--green-wa); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .steps-phone-btn .ph-icon svg { width:18px; height:18px; }
+    .steps-phone-btn .ph-sub { font-size:.7rem; color:var(--muted); font-weight:400; display:block; }
+
+    /* ── CTA BANNER ── */
+    #cta-banner { background:var(--yellow); padding:5rem 5%; text-align:center; }
+    #cta-banner h2 { font-family:'Montserrat',sans-serif; font-size:clamp(1.75rem,4vw,3rem); font-weight:900; color:var(--black); margin-bottom:1rem; letter-spacing:-.5px; }
+    #cta-banner p { font-size:1.05rem; color:rgba(0,0,0,.65); margin-bottom:2rem; }
+    #cta-banner .cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+
+    /* ── CONTACT ── */
+    #contato { background:var(--surface); border-top:1px solid var(--border); }
+    .contact-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1.1fr; gap:5rem; align-items:start; }
+    .contact-info-col .section-head { margin-bottom:2.5rem; }
+    .contact-method { display:flex; align-items:center; gap:1rem; padding:1rem 0; border-bottom:1px solid var(--border); transition:padding-left var(--transition); }
+    .contact-method:hover { padding-left:6px; }
+    .contact-method:last-child { border-bottom:none; }
+    .cm-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cm-icon.wa { background:rgba(37,211,102,.15); }
+    .cm-icon.ph { background:rgba(255,107,0,.15); }
+    .cm-icon svg { width:20px; height:20px; }
+    .cm-icon.wa svg { color:var(--green-wa); }
+    .cm-icon.ph svg { color:var(--orange); }
+    .cm-content { flex:1; }
+    .cm-content small { font-size:.7rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:2px; }
+    .cm-content span { font-size:1rem; font-weight:700; color:var(--white); display:block; }
+    .contact-method:hover .cm-content span { color:var(--yellow); }
+    .cm-arrow svg { width:16px; height:16px; color:var(--muted); }
+    .contact-form-col { background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-lg); padding:2.5rem; }
+    .form-title { font-family:'Montserrat',sans-serif; font-size:1.25rem; font-weight:800; color:var(--white); margin-bottom:.4rem; }
+    .form-sub { font-size:.85rem; color:var(--muted); margin-bottom:2rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
+    .form-field label { font-size:.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+    .form-field input,.form-field select,.form-field textarea { background:rgba(255,255,255,.04); border:1.5px solid var(--border); border-radius:var(--r-sm); padding:.75rem 1rem; color:var(--white); font-family:'Inter',sans-serif; font-size:.9rem; outline:none; transition:border-color var(--transition),background var(--transition); width:100%; -webkit-appearance:none; }
+    .form-field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:2.5rem; cursor:pointer; }
+    .form-field select option { background:var(--surface2); color:var(--white); }
+    .form-field input:focus,.form-field select:focus,.form-field textarea:focus { border-color:var(--yellow); background:rgba(255,214,0,.04); }
+    .form-field input::placeholder,.form-field textarea::placeholder { color:rgba(255,255,255,.2); }
+    .form-field textarea { resize:vertical; min-height:96px; }
+    .btn-submit { width:100%; background:var(--yellow); color:var(--black); font-family:'Montserrat',sans-serif; font-weight:800; font-size:.95rem; padding:.95rem 1.5rem; border-radius:99px; border:none; display:flex; align-items:center; justify-content:center; gap:8px; transition:all var(--transition); margin-top:.5rem; }
+    .btn-submit svg { width:18px; height:18px; }
+    .btn-submit:hover { background:var(--yellow-dk); transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,214,0,.3); }
+
+    /* ── FOOTER ── */
+    footer { background:var(--black); border-top:1px solid var(--border); padding:3rem 5%; }
+    .footer-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; }
+    .footer-copy { font-size:.8rem; color:var(--muted); }
+    .footer-links { display:flex; gap:1.5rem; }
+    .footer-links a { font-size:.8rem; color:var(--muted); transition:color var(--transition); }
+    .footer-links a:hover { color:var(--yellow); }
+    #admin-trigger { font-size:.75rem; color:rgba(255,255,255,.12); cursor:pointer; user-select:none; transition:color .2s; margin-left:.5rem; }
+    #admin-trigger:hover { color:rgba(255,255,255,.3); }
+
+    /* ── WA FLOAT ── */
+    .wa-float { position:fixed; bottom:28px; right:28px; z-index:999; width:62px; height:62px; border-radius:50%; background:var(--green-wa); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 32px rgba(37,211,102,.5); transition:transform var(--transition),box-shadow var(--transition); }
+    .wa-float::before { content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid rgba(37,211,102,.3); animation:pulseBadge 2s infinite; }
+    .wa-float:hover { transform:scale(1.1); box-shadow:0 12px 40px rgba(37,211,102,.6); }
+    .wa-float svg { width:30px; height:30px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:900px) {
+      .hero-inner { grid-template-columns:1fr; text-align:center; }
+      .hero-desc { margin-inline:auto; }
+      .hero-ctas { justify-content:center; }
+      .hero-phones { justify-content:center; }
+      .hero-visual { display:none; }
+      .steps-wrapper { grid-template-columns:1fr; gap:3rem; }
+      .contact-inner { grid-template-columns:1fr; gap:3rem; }
+      .stats-inner { grid-template-columns:repeat(2,1fr); }
+      .stat-divider { display:none; }
+      .services-header { flex-direction:column; align-items:flex-start; }
+      .nav-links { display:none; }
+    }
+    @media (max-width:600px) {
+      section { padding:4rem 5%; }
+      .form-row { grid-template-columns:1fr; }
+      .contact-form-col { padding:1.5rem; }
+      .steps-cta-box { padding:2rem 1.5rem; }
+      .footer-inner { flex-direction:column; text-align:center; }
+      .stats-inner { grid-template-columns:1fr 1fr; }
+    }
+
+    /* ════════════════════════════════════════════════
+       ADMIN PANEL
+    ════════════════════════════════════════════════ */
+    #admin-overlay {
+      position:fixed; inset:0; z-index:9000;
+      background:rgba(0,0,0,.7);
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      animation:fadeAdm .2s ease;
+    }
+    #admin-overlay.open { display:flex; }
+    @keyframes fadeAdm { from{opacity:0} to{opacity:1} }
+
+    /* Password modal */
+    #pwd-modal {
+      background:#161616;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:20px;
+      padding:2.5rem;
+      width:100%;
+      max-width:380px;
+      text-align:center;
+      animation:slideUp .25s ease;
+    }
+    #pwd-modal .pm-icon { font-size:2.5rem; margin-bottom:1rem; }
+    #pwd-modal h3 { font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.25rem; color:var(--white); margin-bottom:.4rem; }
+    #pwd-modal p { font-size:.85rem; color:var(--muted); margin-bottom:1.5rem; }
+    #pwd-modal input {
+      width:100%; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.1);
+      border-radius:10px; padding:.8rem 1rem; color:var(--white); font-size:.95rem;
+      outline:none; text-align:center; letter-spacing:4px; font-family:'Montserrat',sans-serif;
+      transition:border-color .2s; margin-bottom:1rem;
+    }
+    #pwd-modal input:focus { border-color:var(--yellow); }
+    #pwd-modal input::placeholder { letter-spacing:0; font-family:'Inter',sans-serif; color:rgba(255,255,255,.2); }
+    .pwd-btns { display:flex; gap:.75rem; }
+    .pwd-btns button { flex:1; padding:.8rem; border-radius:99px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.875rem; border:none; transition:all .2s; }
+    .pwd-enter { background:var(--yellow); color:var(--black); }
+    .pwd-enter:hover { background:var(--yellow-dk); }
+    .pwd-cancel { background:rgba(255,255,255,.07); color:var(--muted); }
+    .pwd-cancel:hover { background:rgba(255,255,255,.12); color:var(--white); }
+    #pwd-error { font-size:.8rem; color:#f87171; margin-top:.5rem; display:none; }
+
+    /* Admin panel */
+    #admin-panel {
+      background:#111;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:24px;
+      width:100%;
+      max-width:760px;
+      max-height:88vh;
+      display:flex;
+      flex-direction:column;
+      animation:slideUp .3s ease;
+      overflow:hidden;
+    }
+
+    .ap-header {
+      padding:1.5rem 2rem;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-shrink:0;
+    }
+    .ap-header h2 { font-family:'Montserrat',sans-serif; font-size:1rem; font-weight:800; color:var(--white); }
+    .ap-header p { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .ap-close { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.07); border:none; color:var(--muted); font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .ap-close:hover { background:rgba(255,255,255,.14); color:var(--white); }
+
+    .ap-tabs {
+      display:flex;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      padding:0 2rem;
+      flex-shrink:0;
+      overflow-x:auto;
+    }
+    .ap-tab {
+      padding:.85rem 1.25rem;
+      font-size:.8rem;
+      font-weight:600;
+      color:var(--muted);
+      border:none;
+      background:transparent;
+      border-bottom:2px solid transparent;
+      cursor:pointer;
+      transition:all .2s;
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .ap-tab:hover { color:var(--white); }
+    .ap-tab.active { color:var(--yellow); border-bottom-color:var(--yellow); }
+    .ap-tab .tab-icon { font-size:1rem; }
+
+    .ap-body { flex:1; overflow-y:auto; padding:2rem; }
+    .ap-body::-webkit-scrollbar { width:4px; }
+    .ap-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:99px; }
+
+    .ap-section { display:none; }
+    .ap-section.active { display:block; }
+
+    /* Admin form fields */
+    .af-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .af-row.triple { grid-template-columns:1fr 1fr 1fr; }
+    .af-row.single { grid-template-columns:1fr; }
+    .af-group { display:flex; flex-direction:column; gap:.4rem; }
+    .af-group label { font-size:.7rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+    .af-group input,.af-group textarea,.af-group select {
+      background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.08);
+      border-radius:10px; padding:.65rem .9rem; color:var(--white);
+      font-family:'Inter',sans-serif; font-size:.875rem; outline:none;
+      transition:border-color .2s,background .2s; width:100%;
+      -webkit-appearance:none;
+    }
+    .af-group input:focus,.af-group textarea:focus,.af-group select:focus { border-color:var(--yellow); background:rgba(255,214,0,.04); }
+    .af-group input::placeholder,.af-group textarea::placeholder { color:rgba(255,255,255,.18); }
+    .af-group textarea { resize:vertical; min-height:72px; }
+    .af-group .af-hint { font-size:.7rem; color:rgba(255,255,255,.25); margin-top:2px; }
+
+    .af-divider { height:1px; background:rgba(255,255,255,.06); margin:1.5rem 0; }
+    .af-subtitle { font-family:'Montserrat',sans-serif; font-size:.8rem; font-weight:700; color:var(--yellow); text-transform:uppercase; letter-spacing:2px; margin-bottom:1rem; }
+
+    /* Service items in admin */
+    .service-item {
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;
+      padding:1rem;
+      margin-bottom:.75rem;
+      transition:border-color .2s;
+    }
+    .service-item:hover { border-color:rgba(255,214,0,.2); }
+    .si-top { display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem; }
+    .si-num { font-family:'Montserrat',sans-serif; font-size:.75rem; font-weight:800; color:rgba(255,214,0,.4); min-width:20px; }
+    .si-row { display:grid; grid-template-columns:80px 1fr; gap:.75rem; }
+
+    /* Footer of admin */
+    .ap-footer {
+      padding:1.25rem 2rem;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      flex-shrink:0;
+    }
+    .ap-footer-hint { font-size:.75rem; color:var(--muted); }
+    .ap-footer-btns { display:flex; gap:.75rem; }
+    .ap-btn-cancel { padding:.65rem 1.25rem; border-radius:99px; border:1px solid rgba(255,255,255,.1); background:transparent; color:var(--muted); font-family:'Montserrat',sans-serif; font-weight:600; font-size:.8rem; transition:all .2s; }
+    .ap-btn-cancel:hover { background:rgba(255,255,255,.07); color:var(--white); }
+    .ap-btn-save { padding:.65rem 1.5rem; border-radius:99px; background:var(--yellow); color:var(--black); border:none; font-family:'Montserrat',sans-serif; font-weight:800; font-size:.875rem; transition:all .2s; display:flex; align-items:center; gap:6px; }
+    .ap-btn-save:hover { background:var(--yellow-dk); transform:translateY(-1px); }
+    .ap-toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:#1a1a1a; border:1px solid rgba(255,255,255,.1); color:var(--white); font-size:.875rem; padding:.75rem 1.5rem; border-radius:99px; z-index:9999; display:none; animation:slideUp .3s ease; }
+    .ap-toast.show { display:block; }
+    .ap-toast.success { border-color:rgba(34,197,94,.4); }
+
+    @media (max-width:600px) {
+      #admin-panel { max-height:95vh; border-radius:20px 20px 0 0; }
+      .af-row { grid-template-columns:1fr; }
+      .af-row.triple { grid-template-columns:1fr; }
+      .ap-footer { flex-direction:column; align-items:stretch; }
+      .ap-footer-btns { justify-content:stretch; }
+      .ap-btn-cancel,.ap-btn-save { flex:1; justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <svg class="logo-cone" viewBox="0 0 60 80" fill="none">
+        <polygon points="30,4 58,72 2,72" fill="#FF6B00"/>
+        <rect x="14" y="28" width="32" height="8" fill="white" rx="2"/>
+        <rect x="8" y="50" width="44" height="8" fill="white" rx="2"/>
+        <rect x="2" y="65" width="56" height="10" fill="#E55B0A" rx="3"/>
+      </svg>
+      <div class="logo-text">
+        <div class="sub">Thiago</div>
+        <div class="name"><span>A</span>ntunes</div>
+        <div class="tag">Assessoria de Trânsito</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#como-funciona">Como funciona</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a id="nav-wa-btn" href="#" target="_blank" class="btn btn-wa">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Fale Conosco
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge"><span class="dot"></span><span id="hero-badge-text">Atendimento disponível agora</span></div>
+      <h1 class="hero-title" id="hero-title">Sua documentação<br/>resolvida com<br/><span class="highlight">um clique</span></h1>
+      <p class="hero-desc" id="hero-desc">Transferência, recurso de multas, licenciamento e muito mais. Sem filas, sem burocracia — tudo pelo WhatsApp com quem entende de trânsito.</p>
+      <div class="hero-ctas">
+        <a id="hero-wa-btn" href="#" target="_blank" class="btn btn-wa btn-lg">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Solicitar orçamento
+        </a>
+        <a href="#servicos" class="btn btn-outline btn-lg">Ver serviços</a>
+      </div>
+      <div class="hero-phones">
+        <div class="hero-phone-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          <a id="hero-phone1-link" href="#"><span id="hero-phone1-display">(22) 99902-0699</span></a>
+        </div>
+        <div class="hero-phone-item">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <a id="hero-phone2-link" href="#"><span id="hero-phone2-display">(22) 99291-7421</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-cone-main" viewBox="0 0 200 260" fill="none">
+        <defs>
+          <linearGradient id="coneGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF8C38"/><stop offset="100%" stop-color="#FF4500"/>
+          </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#FF6B00" flood-opacity="0.4"/>
+          </filter>
+        </defs>
+        <polygon points="100,10 192,230 8,230" fill="url(#coneGrad)" filter="url(#shadow)"/>
+        <rect x="42" y="88" width="116" height="26" fill="white" rx="6" opacity=".9"/>
+        <rect x="28" y="158" width="144" height="26" fill="white" rx="6" opacity=".9"/>
+        <rect x="8" y="215" width="184" height="34" fill="#CC4A00" rx="10"/>
+      </svg>
+      <div class="floating-card card-a"><div class="fc-icon green">✅</div><div class="fc-text"><div class="fc-label">Status</div><div class="fc-value">Documento aprovado</div></div></div>
+      <div class="floating-card card-b"><div class="fc-icon yellow">⚡</div><div class="fc-text"><div class="fc-label">Tempo médio</div><div class="fc-value">Mesmo dia</div></div></div>
+      <div class="floating-card card-c"><div class="fc-icon orange">🔄</div><div class="fc-text"><div class="fc-label">Serviço</div><div class="fc-value">Transferência</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<div id="stats">
+  <div class="stats-inner">
+    <div class="stat-item reveal">
+      <div class="stat-number" id="stat-clients" data-target="500">0</div>
+      <div class="stat-label">Clientes atendidos</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item reveal" style="transition-delay:.1s">
+      <div class="stat-number" id="stat-experience" data-target="10">0</div>
+      <div class="stat-label">Anos de experiência</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item reveal" style="transition-delay:.2s">
+      <div class="stat-number" id="stat-services-count" data-target="12">0</div>
+      <div class="stat-label">Tipos de serviços</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item reveal" style="transition-delay:.3s">
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Regularizado</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SERVICES ── -->
+<section id="servicos">
+  <div class="services-inner">
+    <div class="services-header">
+      <div>
+        <span class="section-eyebrow reveal">O que fazemos</span>
+        <h2 class="section-title reveal">Todos os serviços<br/><span>de despachante</span></h2>
+      </div>
+      <a id="services-wa-btn" href="#" target="_blank" class="btn btn-outline reveal" style="flex-shrink:0">
+        Ver tudo no WhatsApp
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="services-grid" id="services-grid"></div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="como-funciona">
+  <div class="steps-wrapper">
+    <div>
+      <span class="section-eyebrow reveal">Simples assim</span>
+      <h2 class="section-title reveal">Como funciona<br/><span>o atendimento?</span></h2>
+      <p class="section-sub reveal">Em 3 passos simples você resolve toda a sua documentação sem sair de casa.</p>
+      <div class="steps-list" style="margin-top:3rem;">
+        <div class="step reveal"><div class="step-num">01</div><div class="step-content"><h3>Entre em contato pelo WhatsApp</h3><p>Mande uma mensagem explicando o que precisa. O atendimento é rápido e personalizado.</p></div></div>
+        <div class="step reveal"><div class="step-num">02</div><div class="step-content"><h3>Envie os documentos necessários</h3><p>Nós dizemos exatamente o que você precisa. Tudo é feito de forma digital e segura.</p></div></div>
+        <div class="step reveal"><div class="step-num">03</div><div class="step-content"><h3>Receba tudo resolvido</h3><p>Cuidamos de toda a burocracia com o DETRAN. Você recebe o resultado no prazo combinado.</p></div></div>
+      </div>
+    </div>
+    <div class="steps-cta-box reveal">
+      <div class="big-cone">🚧</div>
+      <h3>Fale com a gente agora</h3>
+      <p>Tire suas dúvidas e receba um orçamento sem compromisso. Atendemos pelo WhatsApp!</p>
+      <div class="steps-cta-phones">
+        <a id="step-wa1" href="#" target="_blank" class="steps-phone-btn">
+          <div class="ph-icon"><svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+          <div><span class="ph-sub">WhatsApp principal</span><span id="step-wa1-text">(22) 99902-0699</span></div>
+        </a>
+        <a id="step-wa2" href="#" target="_blank" class="steps-phone-btn">
+          <div class="ph-icon"><svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+          <div><span class="ph-sub">WhatsApp secundário</span><span id="step-wa2-text">(22) 99291-7421</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BANNER ── -->
+<section id="cta-banner">
+  <h2 class="reveal" id="cta-title">Comprou ou vendeu seu veículo?<br/>A transferência é urgente.</h2>
+  <p class="reveal" id="cta-sub">Não corra risco de ser multado. Resolva hoje mesmo com a Antunes Assessoria.</p>
+  <div class="cta-btns reveal">
+    <a id="cta-wa-btn" href="#" target="_blank" class="btn btn-black btn-lg">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Falar no WhatsApp agora
+    </a>
+    <a href="#contato" class="btn btn-outline btn-lg" style="border-color:rgba(0,0,0,.2);color:var(--black);">Preencher formulário</a>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section id="contato">
+  <div class="contact-inner">
+    <div class="contact-info-col">
+      <div class="section-head">
+        <span class="section-eyebrow reveal">Contato direto</span>
+        <h2 class="section-title reveal">Vamos resolver<br/><span>o seu problema?</span></h2>
+        <p class="section-sub reveal">Escolha como prefere falar com a gente. Respondemos rapidinho!</p>
+      </div>
+      <div>
+        <a id="contact-wa1" href="#" target="_blank" class="contact-method reveal">
+          <div class="cm-icon wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+          <div class="cm-content"><small>WhatsApp</small><span id="contact-wa1-text">(22) 99902-0699</span></div>
+          <div class="cm-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </a>
+        <a id="contact-wa2" href="#" target="_blank" class="contact-method reveal">
+          <div class="cm-icon wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+          <div class="cm-content"><small>WhatsApp 2</small><span id="contact-wa2-text">(22) 99291-7421</span></div>
+          <div class="cm-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </a>
+        <a id="contact-phone" href="#" class="contact-method reveal">
+          <div class="cm-icon ph"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+          <div class="cm-content"><small>Telefone</small><span id="contact-phone-text">(22) 99291-7421</span></div>
+          <div class="cm-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </a>
+      </div>
+    </div>
+    <div class="contact-form-col reveal">
+      <div class="form-title">Solicitar orçamento</div>
+      <div class="form-sub">Preencha e enviaremos a mensagem direto no WhatsApp.</div>
+      <form id="contactForm" onsubmit="submitForm(event)">
+        <div class="form-row">
+          <div class="form-field"><label>Nome</label><input type="text" placeholder="João Silva" required /></div>
+          <div class="form-field"><label>Placa do veículo</label><input type="text" id="placa" placeholder="ABC-1234" maxlength="8" /></div>
+        </div>
+        <div class="form-field">
+          <label>Serviço desejado</label>
+          <select id="form-select" required>
+            <option value="" disabled selected>Selecione um serviço</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Mensagem (opcional)</label><textarea placeholder="Descreva sua situação..."></textarea></div>
+        <button type="submit" class="btn-submit">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Enviar pelo WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="logo">
+      <svg style="width:32px" viewBox="0 0 60 80" fill="none">
+        <polygon points="30,4 58,72 2,72" fill="#FF6B00"/>
+        <rect x="14" y="28" width="32" height="8" fill="white" rx="2"/>
+        <rect x="8" y="50" width="44" height="8" fill="white" rx="2"/>
+        <rect x="2" y="65" width="56" height="10" fill="#CC4A00" rx="3"/>
+      </svg>
+      <div class="logo-text"><div class="sub">Thiago</div><div class="name"><span>A</span>ntunes</div></div>
+    </div>
+    <p class="footer-copy">
+      &copy; 2026 Thiago Antunes Assessoria de Trânsito. Todos os direitos reservados.
+      <span id="admin-trigger" title="Painel administrativo">⚙</span>
+    </p>
+    <div class="footer-links">
+      <a href="#servicos">Serviços</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#contato">Contato</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── WA FLOAT ── -->
+<a id="wa-float" href="#" target="_blank" class="wa-float" title="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+</a>
+
+<!-- ════════════════════════════════════════════════
+     ADMIN OVERLAY
+════════════════════════════════════════════════ -->
+<div id="admin-overlay">
+
+  <!-- Password modal -->
+  <div id="pwd-modal">
+    <div class="pm-icon">🔐</div>
+    <h3>Área Administrativa</h3>
+    <p>Digite a senha para acessar o painel de edição do site.</p>
+    <input type="password" id="pwd-input" placeholder="Digite a senha" />
+    <div id="pwd-error">Senha incorreta. Tente novamente.</div>
+    <div class="pwd-btns">
+      <button class="pwd-cancel" onclick="closeAdmin()">Cancelar</button>
+      <button class="pwd-enter" onclick="checkPassword()">Entrar</button>
+    </div>
+  </div>
+
+  <!-- Admin panel (hidden until auth) -->
+  <div id="admin-panel" style="display:none">
+    <div class="ap-header">
+      <div>
+        <h2>⚙ Painel Administrativo</h2>
+        <p>Todas as alterações são salvas automaticamente no navegador.</p>
+      </div>
+      <button class="ap-close" onclick="closeAdmin()">✕</button>
+    </div>
+
+    <div class="ap-tabs">
+      <button class="ap-tab active" onclick="switchTab('geral',this)"><span class="tab-icon">📊</span> Geral</button>
+      <button class="ap-tab" onclick="switchTab('textos',this)"><span class="tab-icon">✏️</span> Textos</button>
+      <button class="ap-tab" onclick="switchTab('servicos',this)"><span class="tab-icon">🔧</span> Serviços</button>
+      <button class="ap-tab" onclick="switchTab('seguranca',this)"><span class="tab-icon">🔒</span> Segurança</button>
+    </div>
+
+    <div class="ap-body">
+
+      <!-- TAB: GERAL -->
+      <div class="ap-section active" id="tab-geral">
+        <div class="af-subtitle">Números do WhatsApp</div>
+        <div class="af-row">
+          <div class="af-group">
+            <label>WhatsApp Principal (só números)</label>
+            <input type="tel" id="af-wa-primary" placeholder="5522999020699" />
+            <span class="af-hint">Ex: 5522999020699</span>
+          </div>
+          <div class="af-group">
+            <label>Exibição WhatsApp Principal</label>
+            <input type="text" id="af-wa-primary-display" placeholder="(22) 99902-0699" />
+          </div>
+        </div>
+        <div class="af-row">
+          <div class="af-group">
+            <label>WhatsApp Secundário (só números)</label>
+            <input type="tel" id="af-wa-secondary" placeholder="5522992917421" />
+            <span class="af-hint">Ex: 5522992917421</span>
+          </div>
+          <div class="af-group">
+            <label>Exibição WhatsApp Secundário</label>
+            <input type="text" id="af-wa-secondary-display" placeholder="(22) 99291-7421" />
+          </div>
+        </div>
+
+        <div class="af-divider"></div>
+        <div class="af-subtitle">Estatísticas</div>
+        <div class="af-row triple">
+          <div class="af-group">
+            <label>Clientes atendidos</label>
+            <input type="number" id="af-stat-clients" placeholder="500" min="0" />
+          </div>
+          <div class="af-group">
+            <label>Anos de experiência</label>
+            <input type="number" id="af-stat-experience" placeholder="10" min="0" />
+          </div>
+          <div class="af-group">
+            <label>Tipos de serviços</label>
+            <input type="number" id="af-stat-services" placeholder="12" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: TEXTOS -->
+      <div class="ap-section" id="tab-textos">
+        <div class="af-subtitle">Seção Hero (Topo)</div>
+        <div class="af-row single">
+          <div class="af-group">
+            <label>Texto do badge (tag verde)</label>
+            <input type="text" id="af-hero-badge" placeholder="Atendimento disponível agora" />
+          </div>
+        </div>
+        <div class="af-row triple">
+          <div class="af-group">
+            <label>Título — linha 1</label>
+            <input type="text" id="af-hero-line1" placeholder="Sua documentação" />
+          </div>
+          <div class="af-group">
+            <label>Título — linha 2</label>
+            <input type="text" id="af-hero-line2" placeholder="resolvida com" />
+          </div>
+          <div class="af-group">
+            <label>Palavra destacada (amarela)</label>
+            <input type="text" id="af-hero-highlight" placeholder="um clique" />
+          </div>
+        </div>
+        <div class="af-row single">
+          <div class="af-group">
+            <label>Descrição do hero</label>
+            <textarea id="af-hero-desc" placeholder="Transferência, recurso de multas..."></textarea>
+          </div>
+        </div>
+
+        <div class="af-divider"></div>
+        <div class="af-subtitle">Banner CTA (seção amarela)</div>
+        <div class="af-row single">
+          <div class="af-group">
+            <label>Título do banner</label>
+            <input type="text" id="af-cta-title" placeholder="Comprou ou vendeu seu veículo?..." />
+          </div>
+        </div>
+        <div class="af-row single">
+          <div class="af-group">
+            <label>Subtítulo do banner</label>
+            <input type="text" id="af-cta-sub" placeholder="Não corra risco de ser multado..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: SERVIÇOS -->
+      <div class="ap-section" id="tab-servicos">
+        <div class="af-subtitle" style="margin-bottom:1.25rem">Cards de serviços</div>
+        <div id="admin-services-list"></div>
+        <button onclick="addService()" style="width:100%;padding:.7rem;border-radius:10px;border:1.5px dashed rgba(255,255,255,.15);background:transparent;color:var(--muted);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:.5rem;" onmouseover="this.style.borderColor='rgba(255,214,0,.4)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
+          + Adicionar serviço
+        </button>
+      </div>
+
+      <!-- TAB: SEGURANÇA -->
+      <div class="ap-section" id="tab-seguranca">
+        <div class="af-subtitle">Alterar senha do painel</div>
+        <div class="af-row">
+          <div class="af-group">
+            <label>Nova senha</label>
+            <input type="password" id="af-new-pwd" placeholder="••••••••" />
+          </div>
+          <div class="af-group">
+            <label>Confirmar nova senha</label>
+            <input type="password" id="af-confirm-pwd" placeholder="••••••••" />
+          </div>
+        </div>
+        <div id="pwd-change-msg" style="font-size:.8rem;margin-top:.5rem;display:none;"></div>
+        <button onclick="changePassword()" style="padding:.7rem 1.5rem;border-radius:99px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:var(--white);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;margin-top:.5rem;" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          Salvar nova senha
+        </button>
+        <div class="af-divider"></div>
+        <div class="af-subtitle">Redefinir tudo</div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;">Restaura todos os textos, serviços e configurações para os valores originais. A senha não é redefinida.</p>
+        <button onclick="resetToDefaults()" style="padding:.7rem 1.5rem;border-radius:99px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#f87171;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(248,113,113,.2)'" onmouseout="this.style.background='rgba(248,113,113,.1)'">
+          ↩ Restaurar padrões
+        </button>
+      </div>
+
+    </div><!-- /ap-body -->
+
+    <div class="ap-footer">
+      <span class="ap-footer-hint">Alterações aplicadas em tempo real</span>
+      <div class="ap-footer-btns">
+        <button class="ap-btn-cancel" onclick="closeAdmin()">Fechar</button>
+        <button class="ap-btn-save" onclick="saveAll()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:15px;height:15px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar alterações
+        </button>
+      </div>
+    </div>
+  </div><!-- /admin-panel -->
+
+</div><!-- /admin-overlay -->
+
+<div class="ap-toast" id="ap-toast"></div>
+
+<!-- ════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════ -->
+<script>
+/* ── DEFAULT DATA ── */
+const DEFAULTS = {
+  wa: {
+    primary: '5522999020699',
+    primaryDisplay: '(22) 99902-0699',
+    secondary: '5522992917421',
+    secondaryDisplay: '(22) 99291-7421',
+  },
+  stats: { clients: 500, experience: 10, services: 12 },
+  hero: {
+    badge: 'Atendimento disponível agora',
+    line1: 'Sua documentação',
+    line2: 'resolvida com',
+    highlight: 'um clique',
+    desc: 'Transferência, recurso de multas, licenciamento e muito mais. Sem filas, sem burocracia — tudo pelo WhatsApp com quem entende de trânsito.',
+  },
+  cta: {
+    title: 'Comprou ou vendeu seu veículo?\nA transferência é urgente.',
+    sub: 'Não corra risco de ser multado. Resolva hoje mesmo com a Antunes Assessoria.',
+  },
+  services: [
+    { icon:'🔄', title:'Transferência de Propriedade', desc:'Comprou ou vendeu? Fazemos a transferência com toda a segurança.' },
+    { icon:'📋', title:'Licenciamento Anual', desc:'Mantenha seu veículo regularizado com o licenciamento em dia.' },
+    { icon:'⚖️', title:'Recurso de Multas', desc:'Recebeu uma multa? Fazemos o recurso administrativo por você.' },
+    { icon:'📄', title:'2ª Via CRV / CRLV', desc:'Perdeu ou danificou o documento? Emitimos a segunda via rapidamente.' },
+    { icon:'🏙️', title:'Transferência de Jurisdição', desc:'Mudou de estado? Transferimos o registro com toda a documentação.' },
+    { icon:'🏘️', title:'Troca de Município', desc:'Atualização do município de registro sem complicação.' },
+    { icon:'📢', title:'Comunicação de Venda', desc:'Proteja-se após vender. Notificação oficial ao DETRAN.' },
+    { icon:'🔧', title:'Alteração de Características', desc:'Modificou o veículo? Regularize as alterações na documentação.' },
+    { icon:'🆕', title:'1ª Licença', desc:'Veículo novo? Fazemos o primeiro emplacamento e licenciamento.' },
+    { icon:'🔍', title:'Vistoria Veicular', desc:'Toda a documentação necessária para vistoria do seu veículo.' },
+    { icon:'💰', title:'IPVA', desc:'Consulta, parcelamento e orientação sobre o pagamento do IPVA.' },
+    { icon:'🚗', title:'Outros Serviços', desc:'Tem outra pendência? Entre em contato — resolvemos tudo.' },
+  ]
+};
+
+/* ── STATE ── */
+function loadData() {
+  try {
+    const saved = localStorage.getItem('site_data');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+
+let DATA = loadData();
+function getPassword() { return localStorage.getItem('site_pwd') || 'antunes2024'; }
+
+/* ── APPLY DATA TO PAGE ── */
+function applyData(d) {
+  const msg = encodeURIComponent('Olá! Vim pelo site e gostaria de um orçamento.');
+  const p = d.wa.primary, pd = d.wa.primaryDisplay;
+  const s = d.wa.secondary, sd = d.wa.secondaryDisplay;
+
+  // WA links
+  const waUrl = n => `https://wa.me/${n}?text=${msg}`;
+  ['nav-wa-btn','hero-wa-btn','services-wa-btn','cta-wa-btn','step-wa1','contact-wa1'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = waUrl(p);
+  });
+  ['step-wa2','contact-wa2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = waUrl(s);
+  });
+  document.getElementById('wa-float').href = waUrl(p);
+
+  // Hero phone links
+  document.getElementById('hero-phone1-link').href = waUrl(p);
+  document.getElementById('hero-phone2-link').href = `tel:+${s}`;
+
+  // Contact links
+  document.getElementById('contact-wa1').href = waUrl(p);
+  document.getElementById('contact-wa2').href = waUrl(s);
+  document.getElementById('contact-phone').href = `tel:+${s}`;
+
+  // Display texts
+  document.getElementById('hero-phone1-display').textContent = pd;
+  document.getElementById('hero-phone2-display').textContent = sd;
+  document.getElementById('step-wa1-text').textContent = pd;
+  document.getElementById('step-wa2-text').textContent = sd;
+  document.getElementById('contact-wa1-text').textContent = pd;
+  document.getElementById('contact-wa2-text').textContent = sd;
+  document.getElementById('contact-phone-text').textContent = sd;
+
+  // Stats
+  document.getElementById('stat-clients').dataset.target = d.stats.clients;
+  document.getElementById('stat-experience').dataset.target = d.stats.experience;
+  document.getElementById('stat-services-count').dataset.target = d.stats.services;
+
+  // Hero texts
+  document.getElementById('hero-badge-text').textContent = d.hero.badge;
+  document.getElementById('hero-title').innerHTML =
+    `${d.hero.line1}<br/>${d.hero.line2}<br/><span class="highlight">${d.hero.highlight}</span>`;
+  document.getElementById('hero-desc').textContent = d.hero.desc;
+
+  // CTA
+  document.getElementById('cta-title').innerHTML = d.cta.title.replace(/\n/g,'<br/>');
+  document.getElementById('cta-sub').textContent = d.cta.sub;
+
+  // Services grid
+  renderServices(d.services);
+
+  // Contact form select
+  const sel = document.getElementById('form-select');
+  const curVal = sel.value;
+  sel.innerHTML = '<option value="" disabled selected>Selecione um serviço</option>';
+  d.services.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = s.title;
+    sel.appendChild(opt);
+  });
+  sel.value = curVal;
+}
+
+function renderServices(services) {
+  const grid = document.getElementById('services-grid');
+  const arrow = `<div class="s-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>`;
+  grid.innerHTML = services.map((sv, i) => `
+    <div class="service-card reveal" style="transition-delay:${(i*0.05).toFixed(2)}s">
+      <span class="s-icon">${sv.icon}</span>
+      <h3>${sv.title}</h3>
+      <p>${sv.desc}</p>
+      ${arrow}
+    </div>`).join('');
+  // re-observe reveals
+  grid.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+}
+
+/* ── NAVBAR SCROLL ── */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20), { passive:true });
+
+/* ── SCROLL REVEAL ── */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ── STATS COUNTER ── */
+let statsAnimated = false;
+function animateCounter(el, target) {
+  let start = 0;
+  const step = (ts) => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / 1500, 1);
+    const ease = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.floor(ease * target) + (p < 1 ? '' : '+');
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const statsObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !statsAnimated) {
+      statsAnimated = true;
+      document.querySelectorAll('[data-target]').forEach(el => {
+        animateCounter(el, parseInt(el.dataset.target) || 0);
+      });
+    }
+  });
+}, { threshold: 0.5 });
+const statsEl = document.getElementById('stats');
+if (statsEl) statsObs.observe(statsEl);
+
+/* ── PLACA MASK ── */
+const placaInput = document.getElementById('placa');
+if (placaInput) {
+  placaInput.addEventListener('input', function () {
+    let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    // Formato antigo: ABC-1234 | Mercosul: ABC1D23
+    if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3,7);
+    this.value = v;
+  });
+}
+
+/* ── CONTACT FORM ── */
+function submitForm(e) {
+  e.preventDefault();
+  const f = e.target;
+  const nome  = f.querySelector('input[type="text"]').value.trim();
+  const placa = (f.querySelector('#placa')?.value || '').trim();
+  const serv  = f.querySelector('select').value;
+  const msg   = f.querySelector('textarea').value.trim();
+  const texto = [
+    `Olá! Meu nome é *${nome}*.`,``,
+    `📋 *Serviço:* ${serv}`,
+    placa ? `🚗 *Placa:* ${placa}` : '',
+    msg   ? `💬 *Mensagem:* ${msg}` : '',
+    ``,`Vim pelo site e gostaria de um orçamento!`
+  ].filter(Boolean).join('\n');
+  window.open(`https://wa.me/${DATA.wa.primary}?text=${encodeURIComponent(texto)}`,'_blank');
+}
+
+/* ════════════════════════════════════════════════
+   ADMIN PANEL LOGIC
+════════════════════════════════════════════════ */
+const overlay  = document.getElementById('admin-overlay');
+const pwdModal = document.getElementById('pwd-modal');
+const apPanel  = document.getElementById('admin-panel');
+const pwdInput = document.getElementById('pwd-input');
+const pwdError = document.getElementById('pwd-error');
+
+document.getElementById('admin-trigger').addEventListener('click', openAdminPrompt);
+
+function openAdminPrompt() {
+  overlay.classList.add('open');
+  pwdModal.style.display = 'block';
+  apPanel.style.display  = 'none';
+  pwdInput.value = '';
+  pwdError.style.display = 'none';
+  setTimeout(() => pwdInput.focus(), 100);
+}
+
+pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+function checkPassword() {
+  if (pwdInput.value === getPassword()) {
+    pwdModal.style.display = 'none';
+    apPanel.style.display  = 'flex';
+    populateAdminForm();
+  } else {
+    pwdError.style.display = 'block';
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+
+function closeAdmin() {
+  overlay.classList.remove('open');
+}
+overlay.addEventListener('click', e => { if (e.target === overlay) closeAdmin(); });
+
+/* ── TABS ── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.ap-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ap-section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+/* ── POPULATE FORM ── */
+function populateAdminForm() {
+  const d = DATA;
+  // Geral
+  document.getElementById('af-wa-primary').value          = d.wa.primary;
+  document.getElementById('af-wa-primary-display').value  = d.wa.primaryDisplay;
+  document.getElementById('af-wa-secondary').value        = d.wa.secondary;
+  document.getElementById('af-wa-secondary-display').value= d.wa.secondaryDisplay;
+  document.getElementById('af-stat-clients').value    = d.stats.clients;
+  document.getElementById('af-stat-experience').value = d.stats.experience;
+  document.getElementById('af-stat-services').value   = d.stats.services;
+  // Textos
+  document.getElementById('af-hero-badge').value     = d.hero.badge;
+  document.getElementById('af-hero-line1').value     = d.hero.line1;
+  document.getElementById('af-hero-line2').value     = d.hero.line2;
+  document.getElementById('af-hero-highlight').value = d.hero.highlight;
+  document.getElementById('af-hero-desc').value      = d.hero.desc;
+  document.getElementById('af-cta-title').value      = d.cta.title;
+  document.getElementById('af-cta-sub').value        = d.cta.sub;
+  // Services
+  renderAdminServices(d.services);
+}
+
+function renderAdminServices(services) {
+  const list = document.getElementById('admin-services-list');
+  list.innerHTML = services.map((sv, i) => `
+    <div class="service-item" id="si-${i}">
+      <div class="si-top">
+        <span class="si-num">${String(i+1).padStart(2,'0')}</span>
+        <button onclick="removeService(${i})" style="margin-left:auto;padding:4px 10px;border-radius:8px;border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.08);color:#f87171;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(248,113,113,.18)'" onmouseout="this.style.background='rgba(248,113,113,.08)'">Remover</button>
+      </div>
+      <div class="si-row">
+        <div class="af-group">
+          <label>Ícone</label>
+          <input type="text" data-si="${i}" data-field="icon" value="${sv.icon}" placeholder="🔄" style="text-align:center;font-size:1.2rem;" />
+        </div>
+        <div class="af-group">
+          <label>Título</label>
+          <input type="text" data-si="${i}" data-field="title" value="${sv.title}" placeholder="Nome do serviço" />
+        </div>
+      </div>
+      <div class="af-group" style="margin-top:.6rem;">
+        <label>Descrição</label>
+        <textarea data-si="${i}" data-field="desc" placeholder="Breve descrição do serviço..." style="min-height:56px;">${sv.desc}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addService() {
+  DATA.services.push({ icon:'⭐', title:'Novo Serviço', desc:'Descrição do serviço.' });
+  renderAdminServices(DATA.services);
+  document.getElementById('admin-services-list').lastElementChild.scrollIntoView({ behavior:'smooth' });
+}
+
+function removeService(i) {
+  if (DATA.services.length <= 1) { showToast('Deve haver pelo menos 1 serviço.','error'); return; }
+  DATA.services.splice(i, 1);
+  renderAdminServices(DATA.services);
+}
+
+/* ── SAVE ALL ── */
+function collectServices() {
+  const services = [];
+  document.querySelectorAll('#admin-services-list .service-item').forEach((item, i) => {
+    const icon  = item.querySelector('[data-field="icon"]').value.trim() || '⭐';
+    const title = item.querySelector('[data-field="title"]').value.trim() || 'Serviço';
+    const desc  = item.querySelector('[data-field="desc"]').value.trim() || '';
+    services.push({ icon, title, desc });
+  });
+  return services;
+}
+
+function saveAll() {
+  DATA.wa.primary          = document.getElementById('af-wa-primary').value.replace(/\D/g,'') || DATA.wa.primary;
+  DATA.wa.primaryDisplay   = document.getElementById('af-wa-primary-display').value.trim() || DATA.wa.primaryDisplay;
+  DATA.wa.secondary        = document.getElementById('af-wa-secondary').value.replace(/\D/g,'') || DATA.wa.secondary;
+  DATA.wa.secondaryDisplay = document.getElementById('af-wa-secondary-display').value.trim() || DATA.wa.secondaryDisplay;
+  DATA.stats.clients    = parseInt(document.getElementById('af-stat-clients').value)    || 0;
+  DATA.stats.experience = parseInt(document.getElementById('af-stat-experience').value) || 0;
+  DATA.stats.services   = parseInt(document.getElementById('af-stat-services').value)   || 0;
+  DATA.hero.badge     = document.getElementById('af-hero-badge').value.trim()     || DATA.hero.badge;
+  DATA.hero.line1     = document.getElementById('af-hero-line1').value.trim()     || DATA.hero.line1;
+  DATA.hero.line2     = document.getElementById('af-hero-line2').value.trim()     || DATA.hero.line2;
+  DATA.hero.highlight = document.getElementById('af-hero-highlight').value.trim() || DATA.hero.highlight;
+  DATA.hero.desc      = document.getElementById('af-hero-desc').value.trim()      || DATA.hero.desc;
+  DATA.cta.title      = document.getElementById('af-cta-title').value.trim()      || DATA.cta.title;
+  DATA.cta.sub        = document.getElementById('af-cta-sub').value.trim()        || DATA.cta.sub;
+  DATA.services       = collectServices();
+
+  localStorage.setItem('site_data', JSON.stringify(DATA));
+  statsAnimated = false;
+  applyData(DATA);
+  showToast('✓ Alterações salvas com sucesso!', 'success');
+}
+
+/* ── CHANGE PASSWORD ── */
+function changePassword() {
+  const np = document.getElementById('af-new-pwd').value;
+  const cp = document.getElementById('af-confirm-pwd').value;
+  const msg = document.getElementById('pwd-change-msg');
+  if (!np || np.length < 4) { msg.style.display='block'; msg.style.color='#f87171'; msg.textContent='Senha deve ter ao menos 4 caracteres.'; return; }
+  if (np !== cp) { msg.style.display='block'; msg.style.color='#f87171'; msg.textContent='As senhas não conferem.'; return; }
+  localStorage.setItem('site_pwd', np);
+  msg.style.display='block'; msg.style.color='#4ade80'; msg.textContent='Senha alterada com sucesso!';
+  document.getElementById('af-new-pwd').value=''; document.getElementById('af-confirm-pwd').value='';
+}
+
+/* ── RESET DEFAULTS ── */
+function resetToDefaults() {
+  if (!confirm('Tem certeza? Todos os textos e serviços voltarão ao padrão original.')) return;
+  DATA = JSON.parse(JSON.stringify(DEFAULTS));
+  localStorage.removeItem('site_data');
+  statsAnimated = false;
+  applyData(DATA);
+  populateAdminForm();
+  showToast('↩ Padrões restaurados!', 'success');
+}
+
+/* ── TOAST ── */
+function showToast(text, type='success') {
+  const t = document.getElementById('ap-toast');
+  t.textContent = text;
+  t.className = `ap-toast ${type} show`;
+  setTimeout(() => { t.classList.remove('show'); }, 3000);
+}
+
+/* ── INIT ── */
+applyData(DATA);
+</script>
+</body>
+</html>
