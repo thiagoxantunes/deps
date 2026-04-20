@@ -9,7 +9,6 @@ import Textarea from '@/components/ui/Textarea'
 import { formatCPFCNPJ, formatPhone, TAG_LABELS } from '@/utils/cn'
 import toast from 'react-hot-toast'
 import type { Cliente } from '@/types'
-import { AlertTriangle } from 'lucide-react'
 
 interface ClienteFormProps {
   cliente?: Cliente
@@ -52,11 +51,6 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
     return errs
   }
 
-  // Campos pendentes de preenchimento (não bloqueiam, mas alertam)
-  const pendencias: string[] = []
-  if (!form.cpf_cnpj.trim()) pendencias.push('CPF/CNPJ')
-  if (!form.telefone.trim()) pendencias.push('Telefone')
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
@@ -94,11 +88,7 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
         setLoading(false)
         return
       }
-      if (pendencias.length > 0) {
-        toast.success(`Cliente cadastrado! Pendências: ${pendencias.join(', ')}`, { duration: 5000 })
-      } else {
-        toast.success('Cliente cadastrado com sucesso!')
-      }
+      toast.success('Cliente cadastrado com sucesso!')
       router.push(`/clientes/${novo.id}`)
     }
     router.refresh()
@@ -106,19 +96,6 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Alerta de pendências */}
-      {pendencias.length > 0 && (
-        <div className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
-          <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Dados incompletos</p>
-            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-0.5">
-              Preencha também: <strong>{pendencias.join(' e ')}</strong> — você pode salvar agora e completar depois.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Dados pessoais */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Dados Pessoais</h2>
@@ -136,14 +113,7 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
           <div>
             <Input
               id="cpf_cnpj"
-              label={
-                <span className="flex items-center gap-1">
-                  CPF / CNPJ
-                  {!form.cpf_cnpj.trim() && (
-                    <span className="text-xs text-yellow-600 dark:text-yellow-400 font-normal">(pendente)</span>
-                  )}
-                </span>
-              }
+              label="CPF / CNPJ"
               placeholder="000.000.000-00"
               value={formatCPFCNPJ(form.cpf_cnpj)}
               onChange={e => set('cpf_cnpj', e.target.value.replace(/\D/g, ''))}
@@ -168,14 +138,7 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
           <div>
             <Input
               id="telefone"
-              label={
-                <span className="flex items-center gap-1">
-                  Telefone
-                  {!form.telefone.trim() && (
-                    <span className="text-xs text-yellow-600 dark:text-yellow-400 font-normal">(pendente)</span>
-                  )}
-                </span>
-              }
+              label="Telefone"
               placeholder="(11) 99999-9999"
               value={formatPhone(form.telefone)}
               onChange={e => set('telefone', e.target.value.replace(/\D/g, ''))}
