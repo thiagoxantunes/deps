@@ -17,10 +17,10 @@ export default async function LandingPage() {
   // Remove all script tags from body (they won't execute via dangerouslySetInnerHTML)
   body = body.replace(/<script[\s\S]*?<\/script>/gi, '')
 
-  // Add "Acessar Sistema" button in navbar
+  // Add "Área Administrativa" button in navbar
   body = body.replace(
     'Fale Conosco\n      </a>\n    </div>',
-    'Fale Conosco\n      </a>\n      <a href="/dashboard" class="btn btn-outline" style="margin-left:.5rem;font-size:.8rem;padding:.55rem 1.1rem;">🔐 Sistema</a>\n    </div>'
+    'Fale Conosco\n      </a>\n      <a href="/auth/login" class="btn btn-outline" style="margin-left:.5rem;font-size:.8rem;padding:.55rem 1.1rem;">🔐 Área Adm</a>\n    </div>'
   )
 
   // Extract all <script> blocks and get the last one (the main app script)
