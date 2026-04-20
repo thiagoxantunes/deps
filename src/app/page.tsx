@@ -17,11 +17,6 @@ export default async function LandingPage() {
   // Remove all script tags from body (they won't execute via dangerouslySetInnerHTML)
   body = body.replace(/<script[\s\S]*?<\/script>/gi, '')
 
-  // Add "Área Administrativa" button in navbar
-  body = body.replace(
-    'Fale Conosco\n      </a>\n    </div>',
-    'Fale Conosco\n      </a>\n      <a href="/auth/login" class="btn btn-outline" style="margin-left:.5rem;font-size:.8rem;padding:.55rem 1.1rem;">🔐 Área Adm</a>\n    </div>'
-  )
 
   // Extract all <script> blocks and get the last one (the main app script)
   const scripts = [...htmlFile.matchAll(/<script>([\s\S]*?)<\/script>/gi)]
@@ -70,8 +65,9 @@ export default async function LandingPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Reset Next.js body styles for landing page */
         body { background: #0A0A0A !important; color: #fff !important; min-height: unset !important; }
+        /* Oculta painel admin antigo — edição feita dentro do sistema */
+        #admin-overlay, #admin-trigger { display: none !important; }
         ${css}
       `}} />
       <div dangerouslySetInnerHTML={{ __html: body }} />
