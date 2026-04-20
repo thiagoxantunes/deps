@@ -65,7 +65,7 @@ export default function ClienteForm({ cliente }: ClienteFormProps) {
       whatsapp: form.whatsapp,
       email: form.email.trim() || null,
       endereco: form.endereco.trim() || null,
-      cpf_cnpj: form.cpf_cnpj.replace(/\D/g, '') || '',
+      cpf_cnpj: form.cpf_cnpj.replace(/\D/g, '') || null,
       observacoes: form.observacoes.trim() || null,
       tags: form.tags,
     }
