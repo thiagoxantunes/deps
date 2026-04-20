@@ -1,3 +1,5 @@
+export const revalidate = 60
+
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Plus, Users } from 'lucide-react'

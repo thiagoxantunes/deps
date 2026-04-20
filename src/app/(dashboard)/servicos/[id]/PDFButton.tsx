@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import { Download, Upload, Check, Link as LinkIcon } from 'lucide-react'
-import { gerarComprovanteServico } from '@/utils/pdf'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
@@ -59,6 +58,7 @@ export default function PDFButton({ servicoId, servico, cliente, comprovanteUrl:
   const handleGerar = async () => {
     setLoading(true)
     try {
+      const { gerarComprovanteServico } = await import('@/utils/pdf')
       const doc = gerarComprovanteServico(servico, cliente)
       const nomeArquivo = `comprovante-${slugify(servico.tipo_servico)}-${slugify(cliente.nome)}.pdf`
 

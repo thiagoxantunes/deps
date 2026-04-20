@@ -1,3 +1,5 @@
+export const revalidate = 60
+
 import { createClient } from '@/lib/supabase/server'
 import { Wallet, TrendingUp } from 'lucide-react'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
