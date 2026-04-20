@@ -17,6 +17,12 @@ export default async function LandingPage() {
   // Remove all script tags from body (they won't execute via dangerouslySetInnerHTML)
   body = body.replace(/<script[\s\S]*?<\/script>/gi, '')
 
+  // Injeta botão discreto de acesso ao sistema no rodapé (no lugar do ⚙ antigo)
+  body = body.replace(
+    '&copy; 2026 Thiago Antunes Assessoria de Trânsito. Todos os direitos reservados.',
+    '&copy; 2026 Thiago Antunes Assessoria de Trânsito. Todos os direitos reservados. <a id="system-access-btn" href="/auth/login">⚙</a>'
+  )
+
 
   // Extract all <script> blocks and get the last one (the main app script)
   const scripts = [...htmlFile.matchAll(/<script>([\s\S]*?)<\/script>/gi)]
@@ -67,7 +73,19 @@ export default async function LandingPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         body { background: #0A0A0A !important; color: #fff !important; min-height: unset !important; }
         /* Oculta painel admin antigo — edição feita dentro do sistema */
-        #admin-overlay, #admin-trigger { display: none !important; }
+        #admin-overlay { display: none !important; }
+        #admin-trigger { display: none !important; }
+        /* Botão discreto de acesso ao sistema */
+        #system-access-btn {
+          font-size: .72rem;
+          color: rgba(255,255,255,.15);
+          text-decoration: none;
+          cursor: pointer;
+          user-select: none;
+          transition: color .2s;
+          margin-left: .5rem;
+        }
+        #system-access-btn:hover { color: rgba(255,255,255,.4); }
         ${css}
       `}} />
       <div dangerouslySetInnerHTML={{ __html: body }} />
