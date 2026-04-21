@@ -2,7 +2,7 @@ export const revalidate = 60
 
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Users, FileText, CheckCircle, TrendingUp, TrendingDown, Clock, AlertCircle, DollarSign } from 'lucide-react'
+import { Users, FileText, CheckCircle, TrendingUp, TrendingDown, Clock, AlertCircle, DollarSign, Hourglass } from 'lucide-react'
 import { formatCurrency } from '@/utils/cn'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -23,6 +23,7 @@ async function getStats() {
     { data: clientesRecentes },
     { data: pendentesPagamento },
     { data: saidasMes },
+    { data: servicosPendentes },
   ] = await Promise.all([
     supabase.from('clientes').select('*', { count: 'exact', head: true }),
     supabase.from('servicos').select('*', { count: 'exact', head: true }).eq('status', 'em_andamento'),
@@ -45,6 +46,12 @@ async function getStats() {
     // Saídas do mês
     supabase.from('saidas').select('valor')
       .gte('data', firstOfMonth.split('T')[0]),
+    // Serviços pendentes (status = pendente)
+    supabase.from('servicos')
+      .select('id, tipo_servico, valor, data_inicio, cliente:clientes(id, nome), veiculo:veiculos(placa)')
+      .eq('status', 'pendente')
+      .order('data_inicio', { ascending: true })
+      .limit(15),
   ])
 
   const receitaMensal = (receitaData || []).reduce((sum, s) => sum + (s.valor || 0), 0)
@@ -63,6 +70,7 @@ async function getStats() {
     servicosRecentes: servicosRecentes || [],
     clientesRecentes: clientesRecentes || [],
     pendentesPagamento: pendentesPagamento || [],
+    servicosPendentes: servicosPendentes || [],
   }
 }
 
@@ -241,6 +249,62 @@ export default async function DashboardPage() {
                       ) : (
                         <span className="text-xs text-gray-400">Sem valor</span>
                       )}
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Serviços Pendentes */}
+      {stats.servicosPendentes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Hourglass className="w-4 h-4 text-yellow-500" />
+              <CardTitle>Serviços Pendentes</CardTitle>
+              <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+                {stats.servicosPendentes.length}
+              </span>
+            </div>
+            <Link href="/servicos?status=pendente" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+              Ver todos
+            </Link>
+          </CardHeader>
+          <div className="space-y-2">
+            {stats.servicosPendentes.map((s: Record<string, unknown>) => {
+              const cliente = s.cliente as { id: string; nome: string } | null
+              const veiculo = s.veiculo as { placa: string } | null
+              const dataInicio = s.data_inicio
+                ? new Date((s.data_inicio as string) + 'T12:00:00').toLocaleDateString('pt-BR')
+                : null
+              return (
+                <Link key={s.id as string} href={`/servicos/${s.id}`}>
+                  <div className="flex items-center justify-between p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0">
+                        <Hourglass className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{s.tipo_servico as string}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {cliente?.nome || '—'}
+                          {veiculo ? ` • ${veiculo.placa}` : ''}
+                          {dataInicio ? ` • desde ${dataInicio}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="ml-3 flex-shrink-0 text-right">
+                      {s.valor ? (
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          {formatCurrency(s.valor as number)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">Sem valor</span>
+                      )}
+                      <p className="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium mt-0.5">Pendente</p>
                     </div>
                   </div>
                 </Link>
