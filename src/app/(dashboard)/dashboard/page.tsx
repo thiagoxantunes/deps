@@ -238,8 +238,8 @@ export default async function DashboardPage() {
 
       {/* Notificações: Cobranças + Recorrentes */}
       <DashboardNotificacoes
-        pagamentos={stats.pendentesPagamento as import('./DashboardNotificacoes').PagamentoPendente[]}
-        recorrentes={stats.recorrentesAlerta as import('./DashboardNotificacoes').RecorrenteAlerta[]}
+        pagamentos={stats.pendentesPagamento as unknown as import('./DashboardNotificacoes').PagamentoPendente[]}
+        recorrentes={stats.recorrentesAlerta as unknown as import('./DashboardNotificacoes').RecorrenteAlerta[]}
       />
 
       {/* Serviços Pendentes */}
