@@ -63,6 +63,7 @@ export default function Sidebar({ userEmail, notificacoes = [] }: SidebarProps) 
   }
 
   const notifCount = notificacoes.length
+  const recorrentesCount = notificacoes.filter(n => n.tipo === 'recorrente').length
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
@@ -105,9 +106,9 @@ export default function Sidebar({ userEmail, notificacoes = [] }: SidebarProps) 
                 active ? 'text-orange-500 dark:text-orange-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
               )} />
               <span className="flex-1">{item.label}</span>
-              {isRecorrentes && notifCount > 0 && (
+              {isRecorrentes && recorrentesCount > 0 && (
                 <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
-                  {notifCount > 9 ? '9+' : notifCount}
+                  {recorrentesCount > 9 ? '9+' : recorrentesCount}
                 </span>
               )}
               {active && !isRecorrentes && (
