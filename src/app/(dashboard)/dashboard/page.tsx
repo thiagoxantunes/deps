@@ -3,6 +3,9 @@ export const revalidate = 60
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Users, FileText, CheckCircle, TrendingUp, TrendingDown, Clock, AlertCircle, DollarSign, Hourglass } from 'lucide-react'
+
+import DashboardNotificacoes from './DashboardNotificacoes'
+import { differenceInDays } from 'date-fns'
 import { formatCurrency } from '@/utils/cn'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -24,6 +27,7 @@ async function getStats() {
     { data: pendentesPagamento },
     { data: saidasMes },
     { data: servicosPendentes },
+    { data: recorrentesAtivos },
   ] = await Promise.all([
     supabase.from('clientes').select('*', { count: 'exact', head: true }),
     supabase.from('servicos').select('*', { count: 'exact', head: true }).eq('status', 'em_andamento'),
@@ -39,10 +43,10 @@ async function getStats() {
     supabase.from('clientes').select('id, nome, telefone, created_at')
       .order('created_at', { ascending: false }).limit(5),
     supabase.from('servicos')
-      .select('id, tipo_servico, valor, data_conclusao, cliente:clientes(id, nome), veiculo:veiculos(placa)')
+      .select('id, tipo_servico, valor, data_conclusao, cliente:clientes(id, nome, telefone), veiculo:veiculos(placa)')
       .eq('pagamento_status', 'a_receber')
       .order('data_conclusao', { ascending: true })
-      .limit(10),
+      .limit(15),
     // Saídas do mês
     supabase.from('saidas').select('valor')
       .gte('data', firstOfMonth.split('T')[0]),
@@ -52,12 +56,27 @@ async function getStats() {
       .eq('status', 'pendente')
       .order('data_inicio', { ascending: true })
       .limit(15),
+    // Recorrentes ativos para checar alertas
+    supabase.from('servicos_recorrentes')
+      .select('id, tipo_servico, valor, proximo_vencimento, antecedencia_dias, cliente:clientes(id, nome, telefone), veiculo:veiculos(placa)')
+      .eq('ativo', true)
+      .order('proximo_vencimento', { ascending: true })
+      .limit(30),
   ])
 
   const receitaMensal = (receitaData || []).reduce((sum, s) => sum + (s.valor || 0), 0)
   const totalAReceber = (pendentesPagamento || []).reduce((sum, s) => sum + (s.valor || 0), 0)
   const saidasMensal = (saidasMes || []).reduce((sum, s) => sum + (s.valor || 0), 0)
   const saldoMensal = receitaMensal - saidasMensal
+
+  // Filtra recorrentes vencidos ou dentro do prazo de antecedência
+  const hoje = new Date()
+  const recorrentesAlerta = (recorrentesAtivos || [])
+    .map(s => ({
+      ...s,
+      dias: differenceInDays(new Date(s.proximo_vencimento + 'T00:00:00'), hoje),
+    }))
+    .filter(s => s.dias <= s.antecedencia_dias)
 
   return {
     totalClientes: totalClientes || 0,
@@ -71,6 +90,7 @@ async function getStats() {
     clientesRecentes: clientesRecentes || [],
     pendentesPagamento: pendentesPagamento || [],
     servicosPendentes: servicosPendentes || [],
+    recorrentesAlerta,
   }
 }
 
@@ -216,47 +236,11 @@ export default async function DashboardPage() {
       {/* Charts */}
       <DashboardCharts data={chartData} />
 
-      {/* Pendentes de Pagamento */}
-      {stats.pendentesPagamento.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-orange-500" />
-              <CardTitle>Pagamentos Pendentes</CardTitle>
-            </div>
-            <Link href="/servicos" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-              Ver todos
-            </Link>
-          </CardHeader>
-          <div className="space-y-2">
-            {stats.pendentesPagamento.map((s: Record<string, unknown>) => {
-              const cliente = s.cliente as { id: string; nome: string } | null
-              const veiculo = s.veiculo as { placa: string } | null
-              return (
-                <Link key={s.id as string} href={`/servicos/${s.id}`}>
-                  <div className="flex items-center justify-between p-3 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 transition-colors">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{s.tipo_servico as string}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {cliente?.nome || '—'}{veiculo ? ` • ${veiculo.placa}` : ''}
-                      </p>
-                    </div>
-                    <div className="ml-3 flex-shrink-0">
-                      {s.valor ? (
-                        <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
-                          {formatCurrency(s.valor as number)}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">Sem valor</span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </Card>
-      )}
+      {/* Notificações: Cobranças + Recorrentes */}
+      <DashboardNotificacoes
+        pagamentos={stats.pendentesPagamento as import('./DashboardNotificacoes').PagamentoPendente[]}
+        recorrentes={stats.recorrentesAlerta as import('./DashboardNotificacoes').RecorrenteAlerta[]}
+      />
 
       {/* Serviços Pendentes */}
       {stats.servicosPendentes.length > 0 && (
