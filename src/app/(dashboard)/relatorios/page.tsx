@@ -2,25 +2,40 @@ import { createClient } from '@/lib/supabase/server'
 import { BarChart2 } from 'lucide-react'
 import { formatCurrency } from '@/utils/cn'
 import RelatorioClient from './RelatorioClient'
+import RelatorioGraficoClient from './RelatorioGraficoClient'
+import ExportarCSVButton from './ExportarCSVButton'
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mes?: string; ano?: string }>
+  searchParams: Promise<{ mes?: string; ano?: string; dia?: string }>
 }) {
   const params = await searchParams
   const now = new Date()
   const ano = parseInt(params.ano || String(now.getFullYear()))
   const mes = parseInt(params.mes || String(now.getMonth() + 1))
+  const dia = params.dia ? parseInt(params.dia) : null
 
   const dataRef = new Date(ano, mes - 1, 1)
-  const inicio = format(startOfMonth(dataRef), 'yyyy-MM-dd')
-  const fim = format(endOfMonth(dataRef), 'yyyy-MM-dd')
+
+  // Define intervalo conforme filtro
+  let inicio: string
+  let fim: string
+  if (dia) {
+    const d = String(dia).padStart(2, '0')
+    const m = String(mes).padStart(2, '0')
+    inicio = `${ano}-${m}-${d}`
+    fim = inicio
+  } else {
+    inicio = format(startOfMonth(dataRef), 'yyyy-MM-dd')
+    fim = format(endOfMonth(dataRef), 'yyyy-MM-dd')
+  }
 
   const supabase = await createClient()
 
+  // Serviços do período selecionado
   const { data: servicos } = await supabase
     .from('servicos')
     .select('*, cliente:clientes(id, nome)')
@@ -28,7 +43,16 @@ export default async function RelatoriosPage({
     .lte('data_inicio', fim)
     .order('data_inicio', { ascending: false })
 
-  // Últimos 12 meses para o gráfico de evolução
+  // Serviços do mês inteiro (para o gráfico de dias — sempre o mês completo)
+  const inicioMes = format(startOfMonth(dataRef), 'yyyy-MM-dd')
+  const fimMes = format(endOfMonth(dataRef), 'yyyy-MM-dd')
+  const { data: servicosMes } = await supabase
+    .from('servicos')
+    .select('data_inicio, valor, pagamento_status')
+    .gte('data_inicio', inicioMes)
+    .lte('data_inicio', fimMes)
+
+  // Últimos 12 meses para o gráfico de evolução mensal
   const evolucao = await Promise.all(
     Array.from({ length: 12 }, (_, i) => {
       const d = subMonths(now, 11 - i)
@@ -49,6 +73,20 @@ export default async function RelatoriosPage({
     })
   )
 
+  // Gráfico dias do mês — agrupa servicosMes por dia
+  const lastDay = new Date(ano, mes, 0).getDate()
+  const diasMes = Array.from({ length: lastDay }, (_, i) => {
+    const dayNum = i + 1
+    const dayStr = `${ano}-${String(mes).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
+    const dayData = (servicosMes || []).filter(s => s.data_inicio === dayStr)
+    return {
+      dia: String(dayNum).padStart(2, '0'),
+      receita: dayData.filter(s => s.pagamento_status === 'pago').reduce((a, s) => a + (s.valor || 0), 0),
+      a_receber: dayData.filter(s => s.pagamento_status === 'a_receber').reduce((a, s) => a + (s.valor || 0), 0),
+      total: dayData.length,
+    }
+  })
+
   const lista = servicos || []
 
   // Agrupamentos
@@ -66,7 +104,11 @@ export default async function RelatoriosPage({
   const totalAReceber = lista.filter(s => s.pagamento_status === 'a_receber').reduce((a, s) => a + (s.valor || 0), 0)
   const totalFaturado = lista.reduce((a, s) => a + (s.valor || 0), 0)
   const concluidos = lista.filter(s => s.status === 'concluido').length
-  const emAndamento = lista.filter(s => s.status === 'em_andamento').length
+
+  // Label do período
+  const periodoLabel = dia
+    ? format(new Date(ano, mes - 1, dia), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    : format(dataRef, "MMMM 'de' yyyy", { locale: ptBR })
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -74,16 +116,16 @@ export default async function RelatoriosPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <BarChart2 className="w-7 h-7 text-blue-600" />
-            Relatório Mensal
+            Relatórios
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 capitalize">
-            {format(dataRef, "MMMM 'de' yyyy", { locale: ptBR })}
+            {periodoLabel}
           </p>
         </div>
-        <RelatorioClient mes={mes} ano={ano} />
+        <RelatorioClient mes={mes} ano={ano} dia={dia} />
       </div>
 
-      {/* KPIs do mês */}
+      {/* KPIs do período */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Serviços no período', value: String(totalServicos), sub: `${concluidos} concluídos`, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
@@ -102,10 +144,16 @@ export default async function RelatoriosPage({
         ))}
       </div>
 
-      {/* Gráfico de evolução */}
+      {/* Gráfico */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Evolução — últimos 12 meses</h2>
-        <RelatorioGrafico data={evolucao} />
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+          {dia ? `Gráfico — dia ${String(dia).padStart(2, '0')}` : 'Gráfico de receita'}
+        </h2>
+        <RelatorioGraficoClient
+          evolucao={evolucao}
+          diasMes={diasMes}
+          diaAtivo={!!dia}
+        />
       </div>
 
       {/* Por tipo de serviço */}
@@ -186,7 +234,7 @@ export default async function RelatoriosPage({
                   return (
                     <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                       <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                        {format(new Date(s.data_inicio), 'dd/MM/yy', { locale: ptBR })}
+                        {format(new Date(s.data_inicio + 'T12:00:00'), 'dd/MM/yy', { locale: ptBR })}
                       </td>
                       <td className="py-2.5 pr-4 font-medium text-gray-900 dark:text-white max-w-[150px] truncate">
                         {c?.nome || '—'}
@@ -222,11 +270,3 @@ export default async function RelatoriosPage({
     </div>
   )
 }
-
-// Componente de gráfico server-side placeholder (cliente vai renderizar)
-function RelatorioGrafico({ data }: { data: { mes: string; receita: number; a_receber: number; total: number }[] }) {
-  return <RelatorioGraficoClient data={data} />
-}
-
-import RelatorioGraficoClient from './RelatorioGraficoClient'
-import ExportarCSVButton from './ExportarCSVButton'
