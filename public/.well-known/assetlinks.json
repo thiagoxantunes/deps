@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.thiagoantunesassessoria.despachante",
-      "sha256_cert_fingerprints": ["SUBSTITUIR_PELO_SHA256_DO_CERTIFICADO"]
+      "sha256_cert_fingerprints": ["96:92:5D:DE:3A:83:93:BE:99:A2:A7:ED:37:FF:EB:57:A2:16:50:34:DA:E3:CD:6B:74:15:53:9F:3D:D0:FC:B1"]
     }
   }
 ]
