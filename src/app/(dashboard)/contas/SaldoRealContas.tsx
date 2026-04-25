@@ -8,9 +8,11 @@ import { ArrowDownCircle, ArrowUpCircle, Scale, CalendarDays, X } from 'lucide-r
 interface SaldoConta {
   id: string
   nome: string
-  entradas: number
-  saidas: number
-  saldo: number
+  entradas: number        // serviços pagos + depósitos externos
+  saidas: number          // saídas registradas
+  transEntradas: number   // transferências recebidas (não afeta total)
+  transSaidas: number     // transferências enviadas (não afeta total)
+  saldo: number           // entradas - saidas + transEntradas - transSaidas
 }
 
 const MESES_LABEL = [
@@ -76,9 +78,11 @@ export default function SaldoRealContas() {
       qMov,
     ])
 
-    // Acumula valores por conta
-    const entradasMap: Record<string, number> = {}
-    const saidasMap:   Record<string, number> = {}
+    // Acumula valores por conta separando transferências de receitas/despesas reais
+    const entradasMap:    Record<string, number> = {}  // serviços pagos + depósitos externos
+    const saidasMap:      Record<string, number> = {}  // saídas registradas
+    const transEntMap:    Record<string, number> = {}  // recebeu via transferência
+    const transSaiMap:    Record<string, number> = {}  // enviou via transferência
 
     for (const e of (entradas || [])) {
       if (!e.conta_id) continue
@@ -89,19 +93,28 @@ export default function SaldoRealContas() {
       saidasMap[s.conta_id] = (saidasMap[s.conta_id] || 0) + (s.valor || 0)
     }
     for (const m of (movs || [])) {
-      // Entrada no destino (transferência ou depósito)
-      entradasMap[m.conta_destino_id] = (entradasMap[m.conta_destino_id] || 0) + (m.valor || 0)
-      // Saída da origem (só transferência)
       if (m.conta_origem_id) {
-        saidasMap[m.conta_origem_id] = (saidasMap[m.conta_origem_id] || 0) + (m.valor || 0)
+        // TRANSFERÊNCIA entre contas → só ajusta saldo, não afeta entradas/saidas totais
+        transEntMap[m.conta_destino_id] = (transEntMap[m.conta_destino_id] || 0) + (m.valor || 0)
+        transSaiMap[m.conta_origem_id]  = (transSaiMap[m.conta_origem_id]  || 0) + (m.valor || 0)
+      } else {
+        // DEPÓSITO EXTERNO → entra como receita real na conta destino
+        entradasMap[m.conta_destino_id] = (entradasMap[m.conta_destino_id] || 0) + (m.valor || 0)
       }
     }
 
     // Inclui TODAS as contas, mesmo as com saldo zero
     const resultado: SaldoConta[] = (contas ?? []).map(c => {
-      const ent = entradasMap[c.id] ?? 0
-      const sai = saidasMap[c.id]   ?? 0
-      return { id: c.id, nome: c.nome, entradas: ent, saidas: sai, saldo: ent - sai }
+      const ent     = entradasMap[c.id] ?? 0
+      const sai     = saidasMap[c.id]   ?? 0
+      const transEnt = transEntMap[c.id] ?? 0
+      const transSai = transSaiMap[c.id] ?? 0
+      return {
+        id: c.id, nome: c.nome,
+        entradas: ent, saidas: sai,
+        transEntradas: transEnt, transSaidas: transSai,
+        saldo: ent - sai + transEnt - transSai,
+      }
     })
 
     setSaldos(resultado)
@@ -120,9 +133,10 @@ export default function SaldoRealContas() {
   const numDias = ano && mes ? diasDoMes(Number(ano), Number(mes)) : 31
   const diasOptions = Array.from({ length: numDias }, (_, i) => i + 1)
 
+  // Totais reais: só serviços pagos + depósitos externos (transferências não entram)
   const totalEntradas = saldos.reduce((s, c) => s + c.entradas, 0)
   const totalSaidas   = saldos.reduce((s, c) => s + c.saidas, 0)
-  const totalSaldo    = totalEntradas - totalSaidas
+  const totalSaldo    = saldos.reduce((s, c) => s + c.saldo, 0)
 
   const periodoLabel = !ano ? 'Histórico completo' :
     !mes ? String(ano) :
@@ -235,7 +249,7 @@ export default function SaldoRealContas() {
                     {c.saldo > 0 ? '+' : ''}{formatCurrency(c.saldo)}
                   </span>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-3">
                   <div className="flex items-center gap-1.5">
                     <ArrowUpCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
                     <div>
@@ -250,21 +264,19 @@ export default function SaldoRealContas() {
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{formatCurrency(c.saidas)}</p>
                     </div>
                   </div>
+                  {(c.transEntradas > 0 || c.transSaidas > 0) && (
+                    <div className="flex items-center gap-1.5">
+                      <ArrowUpCircle className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-gray-400 leading-none">Transferências</p>
+                        <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                          {c.transEntradas > 0 && `+${formatCurrency(c.transEntradas)}`}
+                          {c.transSaidas > 0 && ` −${formatCurrency(c.transSaidas)}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {(c.entradas > 0 || c.saidas > 0) && (
-                  <div className="mt-2 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
-                    <div
-                      className="h-full bg-green-400 rounded-l-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (c.entradas / (c.entradas + c.saidas)) * 100)}%` }}
-                    />
-                    {c.saidas > 0 && (
-                      <div
-                        className="h-full bg-red-400 rounded-r-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, (c.saidas / (c.entradas + c.saidas)) * 100)}%` }}
-                      />
-                    )}
-                  </div>
-                )}
               </div>
             ))}
           </div>
