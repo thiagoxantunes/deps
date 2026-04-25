@@ -57,26 +57,26 @@ export default async function ContasPage() {
       </div>
 
       {/* KPIs rápidos */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20">
-              <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="!p-3">
+          <div className="flex flex-col gap-2">
+            <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-900/20 w-fit">
+              <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(faturamentoMes)}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Recebido este mês</p>
+            <div className="min-w-0">
+              <p className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">{formatCurrency(faturamentoMes)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">Recebido este mês</p>
             </div>
           </div>
         </Card>
-        <Card>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20">
-              <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+        <Card className="!p-3">
+          <div className="flex flex-col gap-2">
+            <div className="p-2 rounded-xl bg-green-50 dark:bg-green-900/20 w-fit">
+              <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(faturamentoTotal)}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Total histórico recebido</p>
+            <div className="min-w-0">
+              <p className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">{formatCurrency(faturamentoTotal)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">Total histórico</p>
             </div>
           </div>
         </Card>
