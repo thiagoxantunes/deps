@@ -35,7 +35,7 @@ const CATEGORIAS = [
 export default function SaidaForm({ saida }: SaidaFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [contas, setContas] = useState<{ id: string; nome: string }[]>([])
+  const [contas, setContas] = useState<{ id: string; nome: string; descricao: string | null }[]>([])
   const [form, setForm] = useState({
     data: saida?.data || new Date().toISOString().split('T')[0],
     horario: saida?.horario || new Date().toTimeString().slice(0, 5),
@@ -47,7 +47,7 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.from('contas_recebimento').select('id, nome').eq('ativo', true).order('nome')
+    supabase.from('contas_recebimento').select('id, nome, descricao').eq('ativo', true).order('nome')
       .then(({ data }) => { if (data) setContas(data) })
   }, [])
 
@@ -144,7 +144,7 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
             label="De onde saiu o dinheiro *"
             value={form.conta_id}
             onChange={e => set('conta_id', e.target.value)}
-            options={contas.map(c => ({ value: c.id, label: c.nome }))}
+            options={contas.map(c => ({ value: c.id, label: c.descricao ? `${c.nome} — ${c.descricao}` : c.nome }))}
             placeholder="Selecione a conta"
             error={errors.conta_id}
           />

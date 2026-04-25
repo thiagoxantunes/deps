@@ -1,11 +1,12 @@
 export const revalidate = 60
 
 import { createClient } from '@/lib/supabase/server'
-import { Wallet, TrendingUp } from 'lucide-react'
+import { Wallet, TrendingUp, Scale } from 'lucide-react'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { formatCurrency } from '@/utils/cn'
 import ContasManager from './ContasManager'
 import DashboardFinanceiro from './DashboardFinanceiro'
+import SaldoRealContas from './SaldoRealContas'
 
 export default async function ContasPage() {
   const supabase = await createClient()
@@ -14,6 +15,8 @@ export default async function ContasPage() {
     { data: contas },
     { data: totalGeral },
     { data: totalMes },
+    { data: entradasPorConta },
+    { data: saidasPorConta },
   ] = await Promise.all([
     supabase.from('contas_recebimento').select('*').order('created_at'),
     supabase.from('servicos').select('valor').eq('pagamento_status', 'pago'),
@@ -23,12 +26,32 @@ export default async function ContasPage() {
         const d = new Date(); d.setDate(1)
         return d.toISOString().split('T')[0]
       })()),
+    supabase.from('servicos').select('valor, conta_id').eq('pagamento_status', 'pago').not('conta_id', 'is', null),
+    supabase.from('saidas').select('valor, conta_id').not('conta_id', 'is', null),
   ])
 
   const faturamentoTotal = (totalGeral || []).reduce((s, r) => s + (r.valor || 0), 0)
   const faturamentoMes   = (totalMes   || []).reduce((s, r) => s + (r.valor || 0), 0)
 
   const contasList = (contas || []) as { id: string; nome: string; descricao: string | null; ativo: boolean }[]
+
+  // Calcula saldo real por conta
+  const entradasMap: Record<string, number> = {}
+  for (const s of (entradasPorConta || [])) {
+    if (s.conta_id) entradasMap[s.conta_id] = (entradasMap[s.conta_id] || 0) + (s.valor || 0)
+  }
+  const saidasMap: Record<string, number> = {}
+  for (const s of (saidasPorConta || [])) {
+    if (s.conta_id) saidasMap[s.conta_id] = (saidasMap[s.conta_id] || 0) + (s.valor || 0)
+  }
+
+  const saldos = contasList.map(c => ({
+    id: c.id,
+    nome: c.nome,
+    entradas: entradasMap[c.id] || 0,
+    saidas:   saidasMap[c.id]   || 0,
+    saldo:    (entradasMap[c.id] || 0) - (saidasMap[c.id] || 0),
+  }))
 
   return (
     <div className="space-y-6">
@@ -69,8 +92,13 @@ export default async function ContasPage() {
         </Card>
       </div>
 
+      {/* Faturamento por período — linha inteira */}
+      <Card>
+        <DashboardFinanceiro contas={contasList.map(c => ({ id: c.id, nome: c.nome }))} />
+      </Card>
+
+      {/* Contas cadastradas + Saldo Real */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Contas cadastradas */}
         <Card>
           <CardHeader>
             <CardTitle>Contas Cadastradas</CardTitle>
@@ -79,9 +107,15 @@ export default async function ContasPage() {
           <ContasManager contas={contasList} />
         </Card>
 
-        {/* Faturamento por período */}
         <Card>
-          <DashboardFinanceiro contas={contasList.map(c => ({ id: c.id, nome: c.nome }))} />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Scale className="w-4 h-4 text-blue-500" />
+              Saldo Real
+            </CardTitle>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Entradas − Saídas (histórico)</span>
+          </CardHeader>
+          <SaldoRealContas saldos={saldos} />
         </Card>
       </div>
     </div>

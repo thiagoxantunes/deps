@@ -33,7 +33,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
   const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([])
   const [veiculos, setVeiculos] = useState<{ id: string; placa: string; modelo: string }[]>([])
   const [modalClienteOpen, setModalClienteOpen] = useState(false)
-  const [contas, setContas] = useState<{ id: string; nome: string }[]>([])
+  const [contas, setContas] = useState<{ id: string; nome: string; descricao: string | null }[]>([])
   const [form, setForm] = useState({
     cliente_id: servico?.cliente_id || clienteId || '',
     veiculo_id: servico?.veiculo_id || veiculoId || '',
@@ -64,7 +64,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
   useEffect(() => {
     carregarClientes()
     const supabase = createClient()
-    supabase.from('contas_recebimento').select('id, nome').eq('ativo', true).order('nome')
+    supabase.from('contas_recebimento').select('id, nome, descricao').eq('ativo', true).order('nome')
       .then(({ data }) => { if (data) setContas(data) })
   }, [])
 
@@ -319,7 +319,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
               label="Forma de recebimento *"
               value={form.conta_id}
               onChange={e => set('conta_id', e.target.value)}
-              options={contas.map(c => ({ value: c.id, label: c.nome }))}
+              options={contas.map(c => ({ value: c.id, label: c.descricao ? `${c.nome} — ${c.descricao}` : c.nome }))}
               placeholder="Selecione como vai receber"
               error={errors.conta_id}
             />
