@@ -110,6 +110,8 @@ export default function MovimentacaoModal({ open, onClose, movimentacao, onSaved
     setLoading(false)
     onClose()
     onSaved?.()
+    // Notifica todos os componentes client que escutam movimentações
+    window.dispatchEvent(new CustomEvent('movimentacao-saved'))
     router.refresh()
   }
 

@@ -60,6 +60,7 @@ export default function MovimentacoesHistorico() {
     toast.success('Movimentação excluída.')
     setDeletando(null)
     fetchHistorico()
+    window.dispatchEvent(new CustomEvent('movimentacao-saved'))
     router.refresh()
   }
 

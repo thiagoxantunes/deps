@@ -123,6 +123,13 @@ export default function SaldoRealContas() {
 
   useEffect(() => { fetchSaldos() }, [fetchSaldos])
 
+  // Atualiza quando uma movimentação for salva em qualquer parte da página
+  useEffect(() => {
+    const handler = () => fetchSaldos()
+    window.addEventListener('movimentacao-saved', handler)
+    return () => window.removeEventListener('movimentacao-saved', handler)
+  }, [fetchSaldos])
+
   const limpar = () => { setAno(''); setMes(''); setDia('') }
   const hoje   = () => {
     setAno(String(now.getFullYear()))

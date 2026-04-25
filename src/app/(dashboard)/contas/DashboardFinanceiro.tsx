@@ -145,6 +145,13 @@ export default function DashboardFinanceiro({ contas }: { contas: ContaInfo[] })
 
   useEffect(() => { fetchDados() }, [fetchDados])
 
+  // Atualiza quando uma movimentação for salva em qualquer parte da página
+  useEffect(() => {
+    const handler = () => fetchDados()
+    window.addEventListener('movimentacao-saved', handler)
+    return () => window.removeEventListener('movimentacao-saved', handler)
+  }, [fetchDados])
+
   const limpar = () => {
     setAno(String(ANO_ATUAL))
     setMes(String(now.getMonth() + 1))
