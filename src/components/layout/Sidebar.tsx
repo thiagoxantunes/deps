@@ -14,15 +14,15 @@ import type { NotificacaoItem } from '@/types'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/busca', icon: Search, label: 'Busca' },
   { href: '/clientes', icon: Users, label: 'Clientes' },
   { href: '/veiculos', icon: Car, label: 'Veículos' },
   { href: '/servicos', icon: FileText, label: 'Serviços' },
+  { href: '/saidas', icon: TrendingDown, label: 'Saídas' },
+  { href: '/contas', icon: Wallet, label: 'Contas' },
   { href: '/recorrentes', icon: RefreshCw, label: 'Recorrentes' },
   { href: '/whatsapp', icon: MessageCircle, label: 'WhatsApp' },
-  { href: '/contas', icon: Wallet, label: 'Contas' },
-  { href: '/saidas', icon: TrendingDown, label: 'Saídas' },
   { href: '/relatorios', icon: BarChart2, label: 'Relatórios' },
-  { href: '/busca', icon: Search, label: 'Busca' },
   { href: '/landing', icon: Globe, label: 'Landing Page' },
 ]
 
