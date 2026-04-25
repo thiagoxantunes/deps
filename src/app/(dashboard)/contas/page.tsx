@@ -13,23 +13,30 @@ import MovimentacoesHistorico from './MovimentacoesHistorico'
 export default async function ContasPage() {
   const supabase = await createClient()
 
+  const inicioDeMes = (() => { const d = new Date(); d.setDate(1); return d.toISOString().split('T')[0] })()
+
   const [
     { data: contas },
     { data: totalGeral },
     { data: totalMes },
+    { data: depositosGeral },
+    { data: depositosMes },
   ] = await Promise.all([
     supabase.from('contas_recebimento').select('*').order('created_at'),
     supabase.from('servicos').select('valor').eq('pagamento_status', 'pago'),
     supabase.from('servicos').select('valor')
       .eq('pagamento_status', 'pago')
-      .gte('data_conclusao', (() => {
-        const d = new Date(); d.setDate(1)
-        return d.toISOString().split('T')[0]
-      })()),
+      .gte('data_conclusao', inicioDeMes),
+    // Depósitos externos (sem conta de origem) — histórico
+    supabase.from('movimentacoes').select('valor').is('conta_origem_id', null),
+    // Depósitos externos do mês
+    supabase.from('movimentacoes').select('valor').is('conta_origem_id', null).gte('data', inicioDeMes),
   ])
 
-  const faturamentoTotal = (totalGeral || []).reduce((s, r) => s + (r.valor || 0), 0)
-  const faturamentoMes   = (totalMes   || []).reduce((s, r) => s + (r.valor || 0), 0)
+  const faturamentoTotal = (totalGeral   || []).reduce((s, r) => s + (r.valor || 0), 0)
+                         + (depositosGeral || []).reduce((s, r) => s + (r.valor || 0), 0)
+  const faturamentoMes   = (totalMes     || []).reduce((s, r) => s + (r.valor || 0), 0)
+                         + (depositosMes  || []).reduce((s, r) => s + (r.valor || 0), 0)
 
   const contasList = (contas || []) as { id: string; nome: string; descricao: string | null; ativo: boolean }[]
 

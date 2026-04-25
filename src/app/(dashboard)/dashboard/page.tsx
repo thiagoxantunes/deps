@@ -26,6 +26,7 @@ async function getStats() {
     { data: clientesRecentes },
     { data: pendentesPagamento },
     { data: saidasMes },
+    { data: depositosMes },
     { data: servicosPendentes },
     { data: recorrentesAtivos },
   ] = await Promise.all([
@@ -34,7 +35,7 @@ async function getStats() {
     supabase.from('servicos').select('*', { count: 'exact', head: true })
       .eq('status', 'concluido')
       .gte('data_conclusao', firstOfMonth.split('T')[0]),
-    // Receita = apenas serviços efetivamente pagos no mês
+    // Receita = serviços pagos no mês
     supabase.from('servicos').select('valor')
       .eq('pagamento_status', 'pago')
       .gte('data_conclusao', firstOfMonth.split('T')[0]),
@@ -50,6 +51,10 @@ async function getStats() {
     // Saídas do mês
     supabase.from('saidas').select('valor')
       .gte('data', firstOfMonth.split('T')[0]),
+    // Depósitos externos do mês (movimentacoes sem conta de origem)
+    supabase.from('movimentacoes').select('valor')
+      .is('conta_origem_id', null)
+      .gte('data', firstOfMonth.split('T')[0]),
     // Serviços pendentes (status = pendente)
     supabase.from('servicos')
       .select('id, tipo_servico, valor, data_inicio, cliente:clientes(id, nome), veiculo:veiculos(placa)')
@@ -64,7 +69,9 @@ async function getStats() {
       .limit(30),
   ])
 
-  const receitaMensal = (receitaData || []).reduce((sum, s) => sum + (s.valor || 0), 0)
+  const receitaServicos = (receitaData || []).reduce((sum, s) => sum + (s.valor || 0), 0)
+  const receitaDepositos = (depositosMes || []).reduce((sum, s) => sum + (s.valor || 0), 0)
+  const receitaMensal = receitaServicos + receitaDepositos
   const totalAReceber = (pendentesPagamento || []).reduce((sum, s) => sum + (s.valor || 0), 0)
   const saidasMensal = (saidasMes || []).reduce((sum, s) => sum + (s.valor || 0), 0)
   const saldoMensal = receitaMensal - saidasMensal
