@@ -239,9 +239,9 @@ export default function SaldoRealContas() {
             </div>
           </div>
 
-          {/* Por conta — todas, incluindo zeradas */}
+          {/* Por conta — apenas as que tiveram alguma movimentação */}
           <div className="space-y-2">
-            {saldos.map(c => (
+            {saldos.filter(c => c.entradas > 0 || c.saidas > 0 || c.transEntradas > 0 || c.transSaidas > 0).map(c => (
               <div key={c.id} className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{c.nome}</p>
