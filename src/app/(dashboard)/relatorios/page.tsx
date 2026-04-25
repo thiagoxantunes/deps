@@ -4,38 +4,44 @@ import { formatCurrency } from '@/utils/cn'
 import RelatorioClient from './RelatorioClient'
 import RelatorioGraficoClient from './RelatorioGraficoClient'
 import ExportarCSVButton from './ExportarCSVButton'
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { format, startOfMonth, endOfMonth, subMonths, eachDayOfInterval, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mes?: string; ano?: string; dia?: string }>
+  searchParams: Promise<{ mes?: string; ano?: string; dia?: string; de?: string; ate?: string }>
 }) {
   const params = await searchParams
   const now = new Date()
+
+  const modoPeriodo = !!(params.de && params.ate)
+
   const ano = parseInt(params.ano || String(now.getFullYear()))
   const mes = parseInt(params.mes || String(now.getMonth() + 1))
   const dia = params.dia ? parseInt(params.dia) : null
 
-  const dataRef = new Date(ano, mes - 1, 1)
-
-  // Define intervalo conforme filtro
+  // ── Define intervalo de datas ──
   let inicio: string
   let fim: string
-  if (dia) {
+
+  if (modoPeriodo) {
+    inicio = params.de!
+    fim = params.ate!
+  } else if (dia) {
     const d = String(dia).padStart(2, '0')
     const m = String(mes).padStart(2, '0')
     inicio = `${ano}-${m}-${d}`
     fim = inicio
   } else {
+    const dataRef = new Date(ano, mes - 1, 1)
     inicio = format(startOfMonth(dataRef), 'yyyy-MM-dd')
     fim = format(endOfMonth(dataRef), 'yyyy-MM-dd')
   }
 
   const supabase = await createClient()
 
-  // Serviços do período selecionado
+  // ── Serviços do período selecionado ──
   const { data: servicos } = await supabase
     .from('servicos')
     .select('*, cliente:clientes(id, nome)')
@@ -43,16 +49,46 @@ export default async function RelatoriosPage({
     .lte('data_inicio', fim)
     .order('data_inicio', { ascending: false })
 
-  // Serviços do mês inteiro (para o gráfico de dias — sempre o mês completo)
-  const inicioMes = format(startOfMonth(dataRef), 'yyyy-MM-dd')
-  const fimMes = format(endOfMonth(dataRef), 'yyyy-MM-dd')
-  const { data: servicosMes } = await supabase
+  // ── Dados para o gráfico diário ──
+  // Busca serviços do intervalo completo (mês ou período)
+  const { data: servicosGrafico } = await supabase
     .from('servicos')
     .select('data_inicio, valor, pagamento_status')
-    .gte('data_inicio', inicioMes)
-    .lte('data_inicio', fimMes)
+    .gte('data_inicio', inicio)
+    .lte('data_inicio', fim)
 
-  // Últimos 12 meses para o gráfico de evolução mensal
+  // Gera dias do intervalo para o gráfico
+  const diasGrafico = (() => {
+    // Quando é um dia específico: mostra só aquele dia
+    if (dia && !modoPeriodo) {
+      const dayStr = inicio
+      const dayData = (servicosGrafico || []).filter(s => s.data_inicio === dayStr)
+      return [{
+        dia: String(dia).padStart(2, '0'),
+        receita: dayData.filter(s => s.pagamento_status === 'pago').reduce((a, s) => a + (s.valor || 0), 0),
+        a_receber: dayData.filter(s => s.pagamento_status === 'a_receber').reduce((a, s) => a + (s.valor || 0), 0),
+        total: dayData.length,
+      }]
+    }
+
+    // Para mês inteiro ou período personalizado: dia a dia
+    const days = eachDayOfInterval({ start: parseISO(inicio), end: parseISO(fim) })
+    return days.map(d => {
+      const dayStr = format(d, 'yyyy-MM-dd')
+      const dayData = (servicosGrafico || []).filter(s => s.data_inicio === dayStr)
+      const label = modoPeriodo
+        ? format(d, 'dd/MM')
+        : format(d, 'dd')
+      return {
+        dia: label,
+        receita: dayData.filter(s => s.pagamento_status === 'pago').reduce((a, s) => a + (s.valor || 0), 0),
+        a_receber: dayData.filter(s => s.pagamento_status === 'a_receber').reduce((a, s) => a + (s.valor || 0), 0),
+        total: dayData.length,
+      }
+    })
+  })()
+
+  // ── Últimos 12 meses para o gráfico de evolução mensal ──
   const evolucao = await Promise.all(
     Array.from({ length: 12 }, (_, i) => {
       const d = subMonths(now, 11 - i)
@@ -73,23 +109,8 @@ export default async function RelatoriosPage({
     })
   )
 
-  // Gráfico dias do mês — agrupa servicosMes por dia
-  const lastDay = new Date(ano, mes, 0).getDate()
-  const diasMes = Array.from({ length: lastDay }, (_, i) => {
-    const dayNum = i + 1
-    const dayStr = `${ano}-${String(mes).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
-    const dayData = (servicosMes || []).filter(s => s.data_inicio === dayStr)
-    return {
-      dia: String(dayNum).padStart(2, '0'),
-      receita: dayData.filter(s => s.pagamento_status === 'pago').reduce((a, s) => a + (s.valor || 0), 0),
-      a_receber: dayData.filter(s => s.pagamento_status === 'a_receber').reduce((a, s) => a + (s.valor || 0), 0),
-      total: dayData.length,
-    }
-  })
-
   const lista = servicos || []
 
-  // Agrupamentos
   const porTipo = lista.reduce((acc: Record<string, { qtd: number; total: number; recebido: number }>, s) => {
     const tipo = s.tipo_servico
     if (!acc[tipo]) acc[tipo] = { qtd: 0, total: 0, recebido: 0 }
@@ -105,14 +126,22 @@ export default async function RelatoriosPage({
   const totalFaturado = lista.reduce((a, s) => a + (s.valor || 0), 0)
   const concluidos = lista.filter(s => s.status === 'concluido').length
 
-  // Label do período
-  const periodoLabel = dia
+  // ── Label do período ──
+  const periodoLabel = modoPeriodo
+    ? `${format(parseISO(inicio), 'dd/MM/yyyy')} até ${format(parseISO(fim), 'dd/MM/yyyy')}`
+    : dia
     ? format(new Date(ano, mes - 1, dia), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-    : format(dataRef, "MMMM 'de' yyyy", { locale: ptBR })
+    : format(new Date(ano, mes - 1, 1), "MMMM 'de' yyyy", { locale: ptBR })
+
+  const tituloGrafico = modoPeriodo
+    ? `Período: ${format(parseISO(inicio), 'dd/MM')} — ${format(parseISO(fim), 'dd/MM/yyyy')}`
+    : dia
+    ? `Dia ${String(dia).padStart(2, '0')} de ${format(new Date(ano, mes - 1, 1), 'MMMM', { locale: ptBR })}`
+    : `Dias de ${format(new Date(ano, mes - 1, 1), 'MMMM', { locale: ptBR })}`
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <BarChart2 className="w-7 h-7 text-blue-600" />
@@ -122,10 +151,10 @@ export default async function RelatoriosPage({
             {periodoLabel}
           </p>
         </div>
-        <RelatorioClient mes={mes} ano={ano} dia={dia} />
+        <RelatorioClient mes={mes} ano={ano} dia={dia} de={params.de || null} ate={params.ate || null} />
       </div>
 
-      {/* KPIs do período */}
+      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Serviços no período', value: String(totalServicos), sub: `${concluidos} concluídos`, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
@@ -147,12 +176,12 @@ export default async function RelatoriosPage({
       {/* Gráfico */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-          {dia ? `Gráfico — dia ${String(dia).padStart(2, '0')}` : 'Gráfico de receita'}
+          {tituloGrafico}
         </h2>
         <RelatorioGraficoClient
           evolucao={evolucao}
-          diasMes={diasMes}
-          diaAtivo={!!dia}
+          diasMes={diasGrafico}
+          diaAtivo={!!dia || modoPeriodo}
         />
       </div>
 
@@ -178,9 +207,7 @@ export default async function RelatoriosPage({
                       <td className="py-3 text-gray-600 dark:text-gray-400">{data.qtd}</td>
                       <td className="py-3 font-medium text-gray-900 dark:text-white">{formatCurrency(data.total)}</td>
                       <td className="py-3 text-green-600 dark:text-green-400 font-medium">{formatCurrency(data.recebido)}</td>
-                      <td className="py-3 text-orange-600 dark:text-orange-400 font-medium">
-                        {formatCurrency(data.total - data.recebido)}
-                      </td>
+                      <td className="py-3 text-orange-600 dark:text-orange-400 font-medium">{formatCurrency(data.total - data.recebido)}</td>
                     </tr>
                   ))}
               </tbody>
@@ -198,7 +225,7 @@ export default async function RelatoriosPage({
         </div>
       )}
 
-      {/* Listagem detalhada */}
+      {/* Listagem */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -206,7 +233,6 @@ export default async function RelatoriosPage({
           </h2>
           <ExportarCSVButton servicos={lista} mes={mes} ano={ano} />
         </div>
-
         {lista.length === 0 ? (
           <div className="text-center py-10 text-gray-400">
             <BarChart2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -252,9 +278,7 @@ export default async function RelatoriosPage({
                         </span>
                       </td>
                       <td className="py-2.5 pr-4">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pagColor}`}>
-                          {pagLabel}
-                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pagColor}`}>{pagLabel}</span>
                       </td>
                       <td className="py-2.5 font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                         {s.valor ? formatCurrency(s.valor) : '—'}
