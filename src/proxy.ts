@@ -29,8 +29,9 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isPublicPage = request.nextUrl.pathname === '/'
+  const isPublicFile = /^\/(manifest\.json|sw\.js|offline\.html|icons\/)/.test(request.nextUrl.pathname)
 
-  if (!user && !isAuthPage && !isPublicPage) {
+  if (!user && !isAuthPage && !isPublicPage && !isPublicFile) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
@@ -43,6 +44,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest\\.json|sw\\.js|offline\\.html|icons/.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
