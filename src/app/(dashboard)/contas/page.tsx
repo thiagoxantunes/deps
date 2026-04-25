@@ -8,6 +8,7 @@ import ContasManager from './ContasManager'
 import DashboardFinanceiro from './DashboardFinanceiro'
 import SaldoRealContas from './SaldoRealContas'
 import MovimentacaoButton from './MovimentacaoButton'
+import MovimentacoesHistorico from './MovimentacoesHistorico'
 
 export default async function ContasPage() {
   const supabase = await createClient()
@@ -115,6 +116,11 @@ export default async function ContasPage() {
       {/* Faturamento por período — linha inteira */}
       <Card>
         <DashboardFinanceiro contas={contasList.map(c => ({ id: c.id, nome: c.nome }))} />
+      </Card>
+
+      {/* Histórico de movimentações */}
+      <Card>
+        <MovimentacoesHistorico />
       </Card>
 
       {/* Contas cadastradas + Saldo Real */}

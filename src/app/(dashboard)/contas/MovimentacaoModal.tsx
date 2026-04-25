@@ -2,19 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowRightLeft, X, Check, PlusCircle } from 'lucide-react'
+import { ArrowRightLeft, X, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
 interface Conta { id: string; nome: string; descricao: string | null }
 
+export interface MovimentacaoItem {
+  id: string
+  data: string
+  descricao: string
+  valor: number
+  conta_origem_id: string | null
+  conta_destino_id: string
+}
+
 interface Props {
   open: boolean
   onClose: () => void
+  movimentacao?: MovimentacaoItem | null
+  onSaved?: () => void
 }
 
-export default function MovimentacaoModal({ open, onClose }: Props) {
+export default function MovimentacaoModal({ open, onClose, movimentacao, onSaved }: Props) {
   const router = useRouter()
+  const isEditing = !!movimentacao
   const [contas, setContas] = useState<Conta[]>([])
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
@@ -25,6 +37,23 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
     conta_destino_id: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Preenche formulário ao abrir em modo edição
+  useEffect(() => {
+    if (!open) return
+    if (movimentacao) {
+      setForm({
+        data: movimentacao.data,
+        descricao: movimentacao.descricao,
+        valor: String(movimentacao.valor),
+        conta_origem_id: movimentacao.conta_origem_id || '',
+        conta_destino_id: movimentacao.conta_destino_id,
+      })
+    } else {
+      setForm({ data: new Date().toISOString().split('T')[0], descricao: '', valor: '', conta_origem_id: '', conta_destino_id: '' })
+    }
+    setErrors({})
+  }, [open, movimentacao])
 
   useEffect(() => {
     if (!open) return
@@ -39,7 +68,6 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
   }
 
   const contaLabel = (c: Conta) => c.descricao ? `${c.nome} — ${c.descricao}` : c.nome
-
   const isTransferencia = !!form.conta_origem_id
 
   const validate = () => {
@@ -48,9 +76,8 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
     if (!form.descricao.trim()) errs.descricao = 'Descrição obrigatória'
     if (!form.valor || isNaN(parseFloat(form.valor.replace(',', '.')))) errs.valor = 'Valor inválido'
     if (!form.conta_destino_id) errs.conta_destino_id = 'Informe a conta de destino'
-    if (form.conta_origem_id && form.conta_origem_id === form.conta_destino_id) {
+    if (form.conta_origem_id && form.conta_origem_id === form.conta_destino_id)
       errs.conta_destino_id = 'Origem e destino não podem ser iguais'
-    }
     return errs
   }
 
@@ -62,25 +89,27 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
     setLoading(true)
     const supabase = createClient()
     const valor = parseFloat(form.valor.replace(',', '.'))
-
-    const { error } = await supabase.from('movimentacoes').insert({
+    const payload = {
       data: form.data,
       descricao: form.descricao.trim(),
       valor,
       conta_origem_id: form.conta_origem_id || null,
       conta_destino_id: form.conta_destino_id,
-    })
-
-    if (error) {
-      toast.error('Erro ao registrar movimentação.')
-      setLoading(false)
-      return
     }
 
-    toast.success(isTransferencia ? 'Transferência registrada!' : 'Depósito registrado!')
-    setForm({ data: new Date().toISOString().split('T')[0], descricao: '', valor: '', conta_origem_id: '', conta_destino_id: '' })
-    setErrors({})
+    if (isEditing && movimentacao) {
+      const { error } = await supabase.from('movimentacoes').update(payload).eq('id', movimentacao.id)
+      if (error) { toast.error('Erro ao atualizar.'); setLoading(false); return }
+      toast.success('Movimentação atualizada!')
+    } else {
+      const { error } = await supabase.from('movimentacoes').insert(payload)
+      if (error) { toast.error('Erro ao registrar movimentação.'); setLoading(false); return }
+      toast.success(isTransferencia ? 'Transferência registrada!' : 'Depósito registrado!')
+    }
+
+    setLoading(false)
     onClose()
+    onSaved?.()
     router.refresh()
   }
 
@@ -98,7 +127,7 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
             </div>
             <div>
               <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                {isTransferencia ? 'Transferência entre contas' : 'Depósito externo'}
+                {isEditing ? 'Editar movimentação' : isTransferencia ? 'Transferência entre contas' : 'Depósito externo'}
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {isTransferencia
@@ -114,7 +143,6 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Data + Valor */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
@@ -139,10 +167,9 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
             </div>
           </div>
 
-          {/* Conta Origem */}
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Conta de origem <span className="text-gray-400">(opcional — se vazio = depósito externo)</span>
+              Conta de origem <span className="text-gray-400">(opcional — sem origem = depósito externo)</span>
             </label>
             <select
               value={form.conta_origem_id}
@@ -150,48 +177,38 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Nenhuma (depósito externo)</option>
-              {contas.map(c => (
-                <option key={c.id} value={c.id}>{contaLabel(c)}</option>
-              ))}
+              {contas.map(c => <option key={c.id} value={c.id}>{contaLabel(c)}</option>)}
             </select>
           </div>
 
-          {/* Seta visual */}
           {isTransferencia && (
             <div className="flex justify-center">
-              <div className="flex items-center gap-2 text-xs text-blue-500 font-medium">
-                <ArrowRightLeft className="w-4 h-4" />
-                transferindo para →
-              </div>
+              <span className="flex items-center gap-1.5 text-xs text-blue-500 font-medium">
+                <ArrowRightLeft className="w-3.5 h-3.5" /> transferindo para →
+              </span>
             </div>
           )}
 
-          {/* Conta Destino */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Conta de destino *
-            </label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Conta de destino *</label>
             <select
               value={form.conta_destino_id}
               onChange={e => set('conta_destino_id', e.target.value)}
               className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.conta_destino_id ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
             >
               <option value="">Selecione a conta de destino</option>
-              {contas
-                .filter(c => c.id !== form.conta_origem_id)
-                .map(c => (
-                  <option key={c.id} value={c.id}>{contaLabel(c)}</option>
-                ))}
+              {contas.filter(c => c.id !== form.conta_origem_id).map(c => (
+                <option key={c.id} value={c.id}>{contaLabel(c)}</option>
+              ))}
             </select>
             {errors.conta_destino_id && <p className="text-xs text-red-500 mt-1">{errors.conta_destino_id}</p>}
           </div>
 
-          {/* Descrição */}
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
             <input
               type="text"
-              placeholder={isTransferencia ? 'Ex: Depósito caixa na Stone' : 'Ex: Aporte inicial, Investimento...'}
+              placeholder={isTransferencia ? 'Ex: Depósito caixa na Stone' : 'Ex: Aporte inicial...'}
               value={form.descricao}
               onChange={e => set('descricao', e.target.value)}
               className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.descricao ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
@@ -199,29 +216,19 @@ export default function MovimentacaoModal({ open, onClose }: Props) {
             {errors.descricao && <p className="text-xs text-red-500 mt-1">{errors.descricao}</p>}
           </div>
 
-          {/* Info banner */}
           <div className={`p-3 rounded-xl text-xs ${isTransferencia ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'}`}>
             {isTransferencia
-              ? '💡 Transferência: o saldo da conta de origem diminui e o da conta de destino aumenta. Não afeta o faturamento.'
-              : '💡 Depósito externo: o valor entrará como receita no faturamento da conta de destino.'}
+              ? '💡 Transferência: saldo da origem diminui e do destino aumenta. Não afeta faturamento.'
+              : '💡 Depósito externo: entra como receita no faturamento da conta de destino.'}
           </div>
 
-          {/* Ações */}
           <div className="flex gap-3 justify-end pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold disabled:opacity-50">
               <Check className="w-4 h-4" />
-              {loading ? 'Salvando...' : isTransferencia ? 'Transferir' : 'Registrar depósito'}
+              {loading ? 'Salvando...' : isEditing ? 'Salvar alterações' : isTransferencia ? 'Transferir' : 'Registrar depósito'}
             </button>
           </div>
         </form>
