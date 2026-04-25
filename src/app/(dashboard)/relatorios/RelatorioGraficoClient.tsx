@@ -69,13 +69,16 @@ export default function RelatorioGraficoClient({ evolucao, diasMes, diaAtivo }: 
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
             {diaAtivo ? 'Serviços do dia selecionado' : 'Receita por dia do mês selecionado'}
           </p>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={diasMes} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={diasMes} margin={{ top: 5, right: 10, left: 10, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
               <XAxis
                 dataKey="dia"
-                tick={{ fontSize: 10 }}
-                interval={diaAtivo ? 0 : 1}
+                interval={0}
+                tick={{ fontSize: 9 }}
+                angle={-45}
+                textAnchor="end"
+                height={40}
               />
               <YAxis
                 tick={{ fontSize: 11 }}
