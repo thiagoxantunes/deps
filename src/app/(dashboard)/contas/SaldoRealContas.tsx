@@ -53,57 +53,56 @@ export default function SaldoRealContas() {
     const supabase = createClient()
     const range = buildRange(ano, mes, dia)
 
-    // Busca todas as contas (para mostrar mesmo as zeradas)
-    const { data: contas } = await supabase
-      .from('contas_recebimento')
-      .select('id, nome')
-      .order('nome')
-
-    // Entradas: serviços pagos
-    let qEntradas = supabase.from('servicos').select('valor, conta_id').eq('pagamento_status', 'pago').not('conta_id', 'is', null)
+    // Monta queries com filtro de período
+    let qEntradas = supabase.from('servicos').select('valor, conta_id').eq('pagamento_status', 'pago')
     if (range) qEntradas = qEntradas.gte('data_conclusao', range.start).lte('data_conclusao', range.end)
 
-    // Saídas
-    let qSaidas = supabase.from('saidas').select('valor, conta_id').not('conta_id', 'is', null)
+    let qSaidas = supabase.from('saidas').select('valor, conta_id')
     if (range) qSaidas = qSaidas.gte('data', range.start).lte('data', range.end)
 
-    // Movimentações: transferências e depósitos externos
     let qMov = supabase.from('movimentacoes').select('valor, conta_origem_id, conta_destino_id')
     if (range) qMov = qMov.gte('data', range.start).lte('data', range.end)
 
+    // Busca tudo em paralelo — contas SEM filtro para garantir que todas aparecem
     const [
+      { data: contas },
       { data: entradas },
       { data: saidas },
       { data: movs },
-    ] = await Promise.all([qEntradas, qSaidas, qMov])
+    ] = await Promise.all([
+      supabase.from('contas_recebimento').select('id, nome').order('nome'),
+      qEntradas,
+      qSaidas,
+      qMov,
+    ])
 
-    // Acumula por conta
+    // Acumula valores por conta
     const entradasMap: Record<string, number> = {}
-    const saidasMap: Record<string, number> = {}
+    const saidasMap:   Record<string, number> = {}
 
     for (const e of (entradas || [])) {
-      if (e.conta_id) entradasMap[e.conta_id] = (entradasMap[e.conta_id] || 0) + (e.valor || 0)
+      if (!e.conta_id) continue
+      entradasMap[e.conta_id] = (entradasMap[e.conta_id] || 0) + (e.valor || 0)
     }
     for (const s of (saidas || [])) {
-      if (s.conta_id) saidasMap[s.conta_id] = (saidasMap[s.conta_id] || 0) + (s.valor || 0)
+      if (!s.conta_id) continue
+      saidasMap[s.conta_id] = (saidasMap[s.conta_id] || 0) + (s.valor || 0)
     }
     for (const m of (movs || [])) {
-      // Depósito externo (sem origem) → entra como entrada no destino
-      // Transferência (com origem) → sai da origem, entra no destino
+      // Entrada no destino (transferência ou depósito)
       entradasMap[m.conta_destino_id] = (entradasMap[m.conta_destino_id] || 0) + (m.valor || 0)
+      // Saída da origem (só transferência)
       if (m.conta_origem_id) {
         saidasMap[m.conta_origem_id] = (saidasMap[m.conta_origem_id] || 0) + (m.valor || 0)
       }
     }
 
-    // Monta saldos para TODAS as contas (incluindo as zeradas)
-    const resultado: SaldoConta[] = (contas || []).map(c => ({
-      id:       c.id,
-      nome:     c.nome,
-      entradas: entradasMap[c.id] || 0,
-      saidas:   saidasMap[c.id]   || 0,
-      saldo:    (entradasMap[c.id] || 0) - (saidasMap[c.id] || 0),
-    }))
+    // Inclui TODAS as contas, mesmo as com saldo zero
+    const resultado: SaldoConta[] = (contas ?? []).map(c => {
+      const ent = entradasMap[c.id] ?? 0
+      const sai = saidasMap[c.id]   ?? 0
+      return { id: c.id, nome: c.nome, entradas: ent, saidas: sai, saldo: ent - sai }
+    })
 
     setSaldos(resultado)
     setLoading(false)
