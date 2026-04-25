@@ -7,6 +7,7 @@ import { formatCurrency } from '@/utils/cn'
 import ContasManager from './ContasManager'
 import DashboardFinanceiro from './DashboardFinanceiro'
 import SaldoRealContas from './SaldoRealContas'
+import MovimentacaoButton from './MovimentacaoButton'
 
 export default async function ContasPage() {
   const supabase = await createClient()
@@ -17,6 +18,7 @@ export default async function ContasPage() {
     { data: totalMes },
     { data: entradasPorConta },
     { data: saidasPorConta },
+    { data: movimentacoes },
   ] = await Promise.all([
     supabase.from('contas_recebimento').select('*').order('created_at'),
     supabase.from('servicos').select('valor').eq('pagamento_status', 'pago'),
@@ -28,6 +30,7 @@ export default async function ContasPage() {
       })()),
     supabase.from('servicos').select('valor, conta_id').eq('pagamento_status', 'pago').not('conta_id', 'is', null),
     supabase.from('saidas').select('valor, conta_id').not('conta_id', 'is', null),
+    supabase.from('movimentacoes').select('valor, conta_origem_id, conta_destino_id'),
   ])
 
   const faturamentoTotal = (totalGeral || []).reduce((s, r) => s + (r.valor || 0), 0)
@@ -45,25 +48,42 @@ export default async function ContasPage() {
     if (s.conta_id) saidasMap[s.conta_id] = (saidasMap[s.conta_id] || 0) + (s.valor || 0)
   }
 
+  // Movimentações: transferências afetam saldo mas NÃO faturamento
+  // Depósitos externos (conta_origem_id = null) → saldo apenas (faturamento é tratado no DashboardFinanceiro)
+  const transferenciasSaidaMap: Record<string, number> = {}
+  const transferenciasEntradaMap: Record<string, number> = {}
+  for (const m of (movimentacoes || [])) {
+    // Saiu de origem
+    if (m.conta_origem_id) {
+      transferenciasSaidaMap[m.conta_origem_id] = (transferenciasSaidaMap[m.conta_origem_id] || 0) + (m.valor || 0)
+    }
+    // Entrou no destino
+    transferenciasEntradaMap[m.conta_destino_id] = (transferenciasEntradaMap[m.conta_destino_id] || 0) + (m.valor || 0)
+  }
+
   const saldos = contasList.map(c => ({
     id: c.id,
     nome: c.nome,
-    entradas: entradasMap[c.id] || 0,
-    saidas:   saidasMap[c.id]   || 0,
-    saldo:    (entradasMap[c.id] || 0) - (saidasMap[c.id] || 0),
+    entradas: (entradasMap[c.id] || 0) + (transferenciasEntradaMap[c.id] || 0),
+    saidas:   (saidasMap[c.id]   || 0) + (transferenciasSaidaMap[c.id]  || 0),
+    saldo:    (entradasMap[c.id] || 0) + (transferenciasEntradaMap[c.id] || 0)
+            - (saidasMap[c.id]   || 0) - (transferenciasSaidaMap[c.id]  || 0),
   }))
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Wallet className="w-7 h-7 text-orange-500" />
-          Contas de Recebimento
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Gerencie suas contas e acompanhe o faturamento por forma de pagamento
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Wallet className="w-7 h-7 text-orange-500" />
+            Contas de Recebimento
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Gerencie suas contas e acompanhe o faturamento por forma de pagamento
+          </p>
+        </div>
+        <MovimentacaoButton />
       </div>
 
       {/* KPIs rápidos */}

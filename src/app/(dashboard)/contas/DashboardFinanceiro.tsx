@@ -91,7 +91,18 @@ export default function DashboardFinanceiro({ contas }: { contas: ContaInfo[] })
       qSaidas = qSaidas.gte('data', range.start).lte('data', range.end)
     }
 
-    const [{ data: entradas }, { data: saidas }] = await Promise.all([qEntradas, qSaidas])
+    // Busca depósitos externos (conta_origem_id = null → conta como receita)
+    // Transferências (conta_origem_id NOT NULL) → não afetam faturamento
+    let qDepositos = supabase
+      .from('movimentacoes')
+      .select('valor, conta_destino_id')
+      .is('conta_origem_id', null)
+
+    if (range) {
+      qDepositos = qDepositos.gte('data', range.start).lte('data', range.end)
+    }
+
+    const [{ data: entradas }, { data: saidas }, { data: depositos }] = await Promise.all([qEntradas, qSaidas, qDepositos])
 
     // Agrupa por conta
     const map: Record<string, { entradas: number; saidas: number; qtdEntradas: number; qtdSaidas: number }> = {}
@@ -101,6 +112,14 @@ export default function DashboardFinanceiro({ contas }: { contas: ContaInfo[] })
       if (!map[e.conta_id]) map[e.conta_id] = { entradas: 0, saidas: 0, qtdEntradas: 0, qtdSaidas: 0 }
       map[e.conta_id].entradas += e.valor || 0
       map[e.conta_id].qtdEntradas++
+    }
+
+    // Depósitos externos entram como receita no faturamento
+    for (const d of (depositos || [])) {
+      if (!d.conta_destino_id) continue
+      if (!map[d.conta_destino_id]) map[d.conta_destino_id] = { entradas: 0, saidas: 0, qtdEntradas: 0, qtdSaidas: 0 }
+      map[d.conta_destino_id].entradas += d.valor || 0
+      map[d.conta_destino_id].qtdEntradas++
     }
 
     for (const s of (saidas || [])) {
