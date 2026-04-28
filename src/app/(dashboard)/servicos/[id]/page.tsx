@@ -11,6 +11,7 @@ import AnexosSection from './AnexosSection'
 import PDFButton from './PDFButton'
 import MarcarPagoButton from './MarcarPagoButton'
 import MarcarConcluidoButton from './MarcarConcluidoButton'
+import ExcluirServicoButton from './ExcluirServicoButton'
 import WhatsAppServicoButton from '@/components/ui/WhatsAppServicoButton'
 
 const PAGAMENTO_ICONS = {
@@ -98,6 +99,7 @@ export default async function ServicoDetailPage({ params }: { params: Promise<{ 
               Editar
             </Button>
           </Link>
+          <ExcluirServicoButton servicoId={id} />
         </div>
       </div>
 
