@@ -47,6 +47,36 @@ export async function marcarServicoPago(servicoId: string, contaId: string) {
   revalidatePath(`/servicos/${servicoId}`)
 }
 
+export async function desmarcarServicoConcluido(servicoId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('servicos')
+    .update({ status: 'em_andamento', data_conclusao: null })
+    .eq('id', servicoId)
+
+  if (error) throw new Error('Erro ao desmarcar conclusão')
+
+  revalidatePath('/dashboard')
+  revalidatePath('/servicos')
+  revalidatePath(`/servicos/${servicoId}`)
+}
+
+export async function desmarcarServicoPago(servicoId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('servicos')
+    .update({ pagamento_status: 'a_receber', conta_id: null })
+    .eq('id', servicoId)
+
+  if (error) throw new Error('Erro ao desmarcar pagamento')
+
+  revalidatePath('/dashboard')
+  revalidatePath('/servicos')
+  revalidatePath(`/servicos/${servicoId}`)
+}
+
 export async function marcarServicoConcluido(servicoId: string) {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]

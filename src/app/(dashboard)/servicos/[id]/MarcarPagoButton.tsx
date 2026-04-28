@@ -1,13 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, ChevronDown, X } from 'lucide-react'
+import { CheckCircle, X, XCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { marcarServicoPago } from './actions'
+import { marcarServicoPago, desmarcarServicoPago } from './actions'
 
-export default function MarcarPagoButton({ servicoId }: { servicoId: string }) {
+interface Props {
+  servicoId: string
+  pago?: boolean
+}
+
+export default function MarcarPagoButton({ servicoId, pago = false }: Props) {
   const [loading, setLoading] = useState(false)
   const [aberto, setAberto] = useState(false)
   const [contaId, setContaId] = useState('')
@@ -19,6 +24,33 @@ export default function MarcarPagoButton({ servicoId }: { servicoId: string }) {
     supabase.from('contas_recebimento').select('id, nome').eq('ativo', true).order('nome')
       .then(({ data }) => { if (data) setContas(data) })
   }, [])
+
+  // Botão de desmarcar quando já está pago
+  if (pago) {
+    const handleDesmarcar = async () => {
+      setLoading(true)
+      try {
+        await desmarcarServicoPago(servicoId)
+        toast.success('Pagamento desmarcado.')
+        router.refresh()
+      } catch {
+        toast.error('Erro ao desmarcar pagamento.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    return (
+      <button
+        onClick={handleDesmarcar}
+        disabled={loading}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-sm font-medium transition-colors whitespace-nowrap"
+      >
+        <XCircle className="w-4 h-4" />
+        {loading ? 'Salvando...' : 'Desmarcar Pago'}
+      </button>
+    )
+  }
 
   const handleConfirmar = async () => {
     if (!contaId) {

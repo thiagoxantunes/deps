@@ -103,48 +103,51 @@ export default async function ServicoDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      {/* Banner: serviço não concluído */}
-      {servico.status !== 'concluido' && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-          <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Serviço em andamento</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400">
-                Marque como concluído quando finalizar o atendimento.
-              </p>
-            </div>
+      {/* Banner: status do serviço (sempre visível) */}
+      <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border ${
+        servico.status === 'concluido'
+          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+      }`}>
+        <div className="flex items-center gap-3">
+          <CheckCircle className={`w-5 h-5 flex-shrink-0 ${servico.status === 'concluido' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`} />
+          <div>
+            <p className={`font-semibold text-sm ${servico.status === 'concluido' ? 'text-green-800 dark:text-green-200' : 'text-blue-800 dark:text-blue-200'}`}>
+              {servico.status === 'concluido' ? 'Serviço concluído' : 'Serviço em andamento'}
+            </p>
+            <p className={`text-xs ${servico.status === 'concluido' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
+              {servico.status === 'concluido' ? 'Clique para desfazer a conclusão.' : 'Marque como concluído quando finalizar o atendimento.'}
+            </p>
           </div>
-          <MarcarConcluidoButton servicoId={id} />
         </div>
-      )}
+        <MarcarConcluidoButton servicoId={id} concluido={servico.status === 'concluido'} />
+      </div>
 
-      {/* Alerta de pagamento pendente */}
-      {servico.pagamento_status === 'a_receber' && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
-          <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-orange-800 dark:text-orange-200 text-sm">Pagamento pendente</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">
-                Cliente ainda não efetuou o pagamento
-                {servico.valor ? ` de ${formatCurrency(servico.valor)}` : ''}.
-              </p>
-            </div>
+      {/* Banner: status do pagamento (sempre visível) */}
+      <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border ${
+        servico.pagamento_status === 'pago'
+          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+      }`}>
+        <div className="flex items-center gap-3">
+          {servico.pagamento_status === 'pago' ? (
+            <CheckCircle className="w-5 h-5 flex-shrink-0 text-green-600 dark:text-green-400" />
+          ) : (
+            <Clock className="w-5 h-5 flex-shrink-0 text-orange-600 dark:text-orange-400" />
+          )}
+          <div>
+            <p className={`font-semibold text-sm ${servico.pagamento_status === 'pago' ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200'}`}>
+              {servico.pagamento_status === 'pago' ? 'Pagamento recebido' : 'Pagamento pendente'}
+            </p>
+            <p className={`text-xs ${servico.pagamento_status === 'pago' ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              {servico.pagamento_status === 'pago'
+                ? `Clique para desfazer o pagamento${servico.valor ? ` de ${formatCurrency(servico.valor)}` : ''}.`
+                : `Cliente ainda não efetuou o pagamento${servico.valor ? ` de ${formatCurrency(servico.valor)}` : ''}.`}
+            </p>
           </div>
-          <MarcarPagoButton servicoId={id} />
         </div>
-      )}
-
-      {servico.pagamento_status === 'pago' && servico.status === 'concluido' && (
-        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
-          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-          <p className="text-sm font-medium text-green-800 dark:text-green-200">
-            Serviço concluído e pagamento recebido
-            {servico.valor ? ` — ${formatCurrency(servico.valor)}` : ''}.
-          </p>
-        </div>
-      )}
+        <MarcarPagoButton servicoId={id} pago={servico.pagamento_status === 'pago'} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Info */}
