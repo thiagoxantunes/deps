@@ -162,6 +162,8 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
   }
 
   const temValor = !!form.valor && parseFloat(form.valor.replace(',', '.')) > 0
+  // Bloqueia "Sem Cobrança" quando banco e valor estão preenchidos
+  const semCobrancaBloqueado = temValor && !!form.conta_id
 
   return (
     <>
@@ -369,23 +371,30 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
                 active: 'ring-2 ring-gray-400',
                 iconColor: 'text-gray-500',
               },
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set('pagamento_status', opt.value)}
-                className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all
-                  ${opt.color}
-                  ${form.pagamento_status === opt.value ? opt.active : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}
-                `}
-              >
-                <opt.icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${opt.iconColor}`} />
-                <div>
-                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{opt.label}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{opt.desc}</p>
-                </div>
-              </button>
-            ))}
+            ].map(opt => {
+              const bloqueado = opt.value === 'pendente' && semCobrancaBloqueado
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={bloqueado}
+                  onClick={() => !bloqueado && set('pagamento_status', opt.value)}
+                  title={bloqueado ? 'Não é possível selecionar "Sem Cobrança" quando há banco e valor preenchidos' : undefined}
+                  className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all
+                    ${bloqueado ? 'opacity-40 cursor-not-allowed border-transparent' : opt.color}
+                    ${!bloqueado && form.pagamento_status === opt.value ? opt.active : !bloqueado ? 'border-transparent hover:border-gray-200 dark:hover:border-gray-600' : ''}
+                  `}
+                >
+                  <opt.icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${opt.iconColor}`} />
+                  <div>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{opt.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {bloqueado ? 'Remova o banco ou o valor para usar esta opção' : opt.desc}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
           </div>
 
           {/* Alerta contextual */}

@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale'
 import AnexosSection from './AnexosSection'
 import PDFButton from './PDFButton'
 import MarcarPagoButton from './MarcarPagoButton'
+import MarcarConcluidoButton from './MarcarConcluidoButton'
 import WhatsAppServicoButton from '@/components/ui/WhatsAppServicoButton'
 
 const PAGAMENTO_ICONS = {
@@ -99,6 +100,22 @@ export default async function ServicoDetailPage({ params }: { params: Promise<{ 
           </Link>
         </div>
       </div>
+
+      {/* Banner: serviço não concluído */}
+      {servico.status !== 'concluido' && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+          <div className="flex items-center gap-3">
+            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Serviço em andamento</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Marque como concluído quando finalizar o atendimento.
+              </p>
+            </div>
+          </div>
+          <MarcarConcluidoButton servicoId={id} />
+        </div>
+      )}
 
       {/* Alerta de pagamento pendente */}
       {servico.pagamento_status === 'a_receber' && (
