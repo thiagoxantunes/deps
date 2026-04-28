@@ -3,14 +3,13 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Search, Eye, Pencil, Trash2, FileText, X, CheckCircle2 } from 'lucide-react'
+import { Search, Eye, Pencil, Trash2, FileText, X } from 'lucide-react'
 import { STATUS_LABELS, STATUS_COLORS, TIPOS_SERVICO, formatCurrency, PAGAMENTO_STATUS_LABELS, PAGAMENTO_STATUS_COLORS } from '@/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import ConfirmComSenhaDialog from '@/components/ui/ConfirmComSenhaDialog'
 import toast from 'react-hot-toast'
 import { format, isToday, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { marcarServicoConcluido } from './[id]/actions'
 
 interface Servico {
   id: string
@@ -68,20 +67,6 @@ export default function ServicosTable({
   const [, startTransition] = useTransition()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const [concludingId, setConcludingId] = useState<string | null>(null)
-
-  const handleConcluir = async (id: string) => {
-    setConcludingId(id)
-    try {
-      await marcarServicoConcluido(id)
-      toast.success('Serviço marcado como concluído!')
-      router.refresh()
-    } catch {
-      toast.error('Erro ao atualizar status.')
-    } finally {
-      setConcludingId(null)
-    }
-  }
 
   const applyFilter = (q: string, status: string, tipo: string, ano: string, mes: string, dia: string) => {
     const params = new URLSearchParams()
@@ -271,19 +256,7 @@ export default function ServicosTable({
                         </td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">{s.veiculo?.placa || '—'}</td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${STATUS_COLORS[s.status]}`}>{STATUS_LABELS[s.status]}</span>
-                            {s.status !== 'concluido' && (
-                              <button
-                                onClick={() => handleConcluir(s.id)}
-                                disabled={concludingId === s.id}
-                                title="Marcar como Concluído"
-                                className="p-1 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors disabled:opacity-50"
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${STATUS_COLORS[s.status]}`}>{STATUS_LABELS[s.status]}</span>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${PAGAMENTO_STATUS_COLORS[s.pagamento_status]}`}>{PAGAMENTO_STATUS_LABELS[s.pagamento_status]}</span>
@@ -319,16 +292,6 @@ export default function ServicosTable({
                     </div>
                     <div className="mt-2 flex items-center gap-2 flex-wrap">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[s.status]}`}>{STATUS_LABELS[s.status]}</span>
-                      {s.status !== 'concluido' && (
-                        <button
-                          onClick={() => handleConcluir(s.id)}
-                          disabled={concludingId === s.id}
-                          className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition-colors disabled:opacity-50"
-                        >
-                          <CheckCircle2 className="w-3 h-3" />
-                          {concludingId === s.id ? '...' : 'Concluir'}
-                        </button>
-                      )}
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PAGAMENTO_STATUS_COLORS[s.pagamento_status]}`}>{PAGAMENTO_STATUS_LABELS[s.pagamento_status]}</span>
                       {s.veiculo && <span className="text-xs font-mono text-gray-500">{s.veiculo.placa}</span>}
                       {s.valor && <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-auto">{formatCurrency(s.valor)}</span>}
