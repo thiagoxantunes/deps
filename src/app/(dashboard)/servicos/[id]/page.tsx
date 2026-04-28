@@ -119,15 +119,15 @@ export default async function ServicoDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* Alerta de pagamento pendente — só aparece quando o serviço JÁ está concluído */}
-      {servico.pagamento_status === 'a_receber' && servico.status === 'concluido' && (
+      {/* Alerta de pagamento pendente */}
+      {servico.pagamento_status === 'a_receber' && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
           <div className="flex items-center gap-3">
             <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
             <div>
               <p className="font-semibold text-orange-800 dark:text-orange-200 text-sm">Pagamento pendente</p>
               <p className="text-xs text-orange-600 dark:text-orange-400">
-                Serviço concluído. Cliente ainda não efetuou o pagamento
+                Cliente ainda não efetuou o pagamento
                 {servico.valor ? ` de ${formatCurrency(servico.valor)}` : ''}.
               </p>
             </div>
