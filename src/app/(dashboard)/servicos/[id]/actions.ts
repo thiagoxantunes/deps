@@ -46,3 +46,30 @@ export async function marcarServicoPago(servicoId: string, contaId: string) {
   revalidatePath('/servicos')
   revalidatePath(`/servicos/${servicoId}`)
 }
+
+export async function marcarServicoConcluido(servicoId: string) {
+  const supabase = await createClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const { data: servico, error: fetchError } = await supabase
+    .from('servicos')
+    .select('data_conclusao')
+    .eq('id', servicoId)
+    .single()
+
+  if (fetchError || !servico) throw new Error('Serviço não encontrado')
+
+  const updates: Record<string, unknown> = { status: 'concluido' }
+  if (!servico.data_conclusao) updates.data_conclusao = today
+
+  const { error } = await supabase
+    .from('servicos')
+    .update(updates)
+    .eq('id', servicoId)
+
+  if (error) throw new Error('Erro ao atualizar status')
+
+  revalidatePath('/dashboard')
+  revalidatePath('/servicos')
+  revalidatePath(`/servicos/${servicoId}`)
+}
