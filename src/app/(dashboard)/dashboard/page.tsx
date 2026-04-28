@@ -11,11 +11,14 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import DashboardCharts from './DashboardCharts'
+import DashboardMesNavegacao from './DashboardMesNavegacao'
 
-async function getStats() {
+async function getStats(mes: number, ano: number) {
   const supabase = await createClient()
-  const now = new Date()
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+  const firstOfMonth = `${ano}-${String(mes).padStart(2, '0')}-01`
+  const lastDay = new Date(ano, mes, 0).getDate()
+  const lastOfMonth = `${ano}-${String(mes).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
   const [
     { count: totalClientes },
@@ -34,11 +37,13 @@ async function getStats() {
     supabase.from('servicos').select('*', { count: 'exact', head: true }).eq('status', 'em_andamento'),
     supabase.from('servicos').select('*', { count: 'exact', head: true })
       .eq('status', 'concluido')
-      .gte('data_conclusao', firstOfMonth.split('T')[0]),
+      .gte('data_conclusao', firstOfMonth)
+      .lte('data_conclusao', lastOfMonth),
     // Receita = serviços pagos no mês
     supabase.from('servicos').select('valor')
       .eq('pagamento_status', 'pago')
-      .gte('data_conclusao', firstOfMonth.split('T')[0]),
+      .gte('data_conclusao', firstOfMonth)
+      .lte('data_conclusao', lastOfMonth),
     supabase.from('servicos').select('*, cliente:clientes(nome)')
       .order('created_at', { ascending: false }).limit(5),
     supabase.from('clientes').select('id, nome, telefone, created_at')
@@ -50,11 +55,13 @@ async function getStats() {
       .limit(15),
     // Saídas do mês
     supabase.from('saidas').select('valor')
-      .gte('data', firstOfMonth.split('T')[0]),
+      .gte('data', firstOfMonth)
+      .lte('data', lastOfMonth),
     // Depósitos externos do mês (movimentacoes sem conta de origem)
     supabase.from('movimentacoes').select('valor')
       .is('conta_origem_id', null)
-      .gte('data', firstOfMonth.split('T')[0]),
+      .gte('data', firstOfMonth)
+      .lte('data', lastOfMonth),
     // Serviços pendentes (status = pendente)
     supabase.from('servicos')
       .select('id, tipo_servico, valor, data_inicio, cliente:clientes(id, nome), veiculo:veiculos(placa)')
@@ -138,8 +145,23 @@ const STATUS_MAP = {
   pendente: { label: 'Pendente', color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30 dark:text-yellow-400' },
 }
 
-export default async function DashboardPage() {
-  const [stats, chartData] = await Promise.all([getStats(), getChartData()])
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mes?: string; ano?: string }>
+}) {
+  const params = await searchParams
+  const agora = new Date()
+  const mes = params.mes ? parseInt(params.mes) : agora.getMonth() + 1
+  const ano = params.ano ? parseInt(params.ano) : agora.getFullYear()
+
+  const mesSanitizado = Math.min(12, Math.max(1, isNaN(mes) ? agora.getMonth() + 1 : mes))
+  const anoSanitizado = isNaN(ano) ? agora.getFullYear() : ano
+
+  const [stats, chartData] = await Promise.all([
+    getStats(mesSanitizado, anoSanitizado),
+    getChartData(),
+  ])
 
   const statCards = [
     {
@@ -178,11 +200,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Visão geral do seu negócio — {format(new Date(), "MMMM 'de' yyyy", { locale: ptBR })}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Visão geral do seu negócio</p>
+        </div>
+        <DashboardMesNavegacao mes={mesSanitizado} ano={anoSanitizado} />
       </div>
 
       {/* Financeiro do mês */}
