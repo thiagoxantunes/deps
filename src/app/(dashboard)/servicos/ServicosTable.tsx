@@ -3,11 +3,9 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Search, Eye, Pencil, Trash2, FileText, X } from 'lucide-react'
+import { Search, Eye, FileText, X } from 'lucide-react'
 import { STATUS_LABELS, STATUS_COLORS, TIPOS_SERVICO, formatCurrency, PAGAMENTO_STATUS_LABELS, PAGAMENTO_STATUS_COLORS } from '@/utils/cn'
 import { createClient } from '@/lib/supabase/client'
-import ConfirmComSenhaDialog from '@/components/ui/ConfirmComSenhaDialog'
-import toast from 'react-hot-toast'
 import { format, isToday, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -65,9 +63,6 @@ export default function ServicosTable({
   const pathname = usePathname()
   const [search, setSearch] = useState(searchQuery)
   const [, startTransition] = useTransition()
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
-
   const applyFilter = (q: string, status: string, tipo: string, ano: string, mes: string, dia: string) => {
     const params = new URLSearchParams()
     if (q)      params.set('q', q)
@@ -89,17 +84,6 @@ export default function ServicosTable({
   }
 
   const temFiltroData = !!(anoFilter || mesFilter || diaFilter)
-
-  const handleDelete = async () => {
-    if (!deleteId) return
-    setDeleting(true)
-    const supabase = createClient()
-    const { error } = await supabase.from('servicos').delete().eq('id', deleteId)
-    if (error) toast.error('Erro ao excluir serviço.')
-    else { toast.success('Serviço excluído!'); router.refresh() }
-    setDeleting(false)
-    setDeleteId(null)
-  }
 
   // Agrupa por data_inicio — mais recente primeiro
   const grupos = servicos.reduce<Record<string, Servico[]>>((acc, s) => {
@@ -263,10 +247,8 @@ export default function ServicosTable({
                         </td>
                         <td className="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{s.valor ? formatCurrency(s.valor) : '—'}</td>
                         <td className="px-4 py-3">
-                          <div className="flex justify-end gap-1">
+                          <div className="flex justify-end">
                             <Link href={`/servicos/${s.id}`}><button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><Eye className="w-4 h-4" /></button></Link>
-                            <Link href={`/servicos/${s.id}/editar`}><button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><Pencil className="w-4 h-4" /></button></Link>
-                            <button onClick={() => setDeleteId(s.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </tr>
@@ -286,8 +268,6 @@ export default function ServicosTable({
                       </div>
                       <div className="flex gap-1 flex-shrink-0">
                         <Link href={`/servicos/${s.id}`}><button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><Eye className="w-4 h-4" /></button></Link>
-                        <Link href={`/servicos/${s.id}/editar`}><button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><Pencil className="w-4 h-4" /></button></Link>
-                        <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                     <div className="mt-2 flex items-center gap-2 flex-wrap">
@@ -304,15 +284,6 @@ export default function ServicosTable({
         </div>
       )}
 
-      <ConfirmComSenhaDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-        title="Excluir serviço"
-        message="Esta ação é permanente e removerá o serviço e seus anexos. Digite sua senha para confirmar."
-        confirmLabel="Excluir"
-        loading={deleting}
-      />
     </>
   )
 }
