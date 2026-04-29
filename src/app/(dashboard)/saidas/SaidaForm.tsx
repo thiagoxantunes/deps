@@ -85,7 +85,8 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
     if (saida) {
       const { error } = await supabase.from('saidas').update(data).eq('id', saida.id)
       if (error) {
-        toast.error(`Erro ao atualizar: ${error.message}`)
+        console.error('Erro ao atualizar saída:', error)
+        toast.error('Erro ao atualizar saída. Tente novamente.')
         setLoading(false)
         return
       }
@@ -93,7 +94,8 @@ export default function SaidaForm({ saida }: SaidaFormProps) {
     } else {
       const { error } = await supabase.from('saidas').insert(data)
       if (error) {
-        toast.error(`Erro ao registrar: ${error.message}`)
+        console.error('Erro ao registrar saída:', error)
+        toast.error('Erro ao registrar saída. Tente novamente.')
         setLoading(false)
         return
       }

@@ -139,7 +139,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
       const { error } = await supabase.from('servicos').update(data).eq('id', servico.id)
       if (error) {
         console.error('Erro ao atualizar serviço:', error)
-        toast.error(`Erro ao atualizar serviço: ${error.message}`)
+        toast.error('Erro ao atualizar serviço. Tente novamente.')
         setLoading(false)
         return
       }
@@ -150,7 +150,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
       const { data: novo, error } = await supabase.from('servicos').insert(data).select().single()
       if (error) {
         console.error('Erro ao cadastrar serviço:', error)
-        toast.error(`Erro ao cadastrar serviço: ${error.message}`)
+        toast.error('Erro ao cadastrar serviço. Tente novamente.')
         setLoading(false)
         return
       }

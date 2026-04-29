@@ -35,6 +35,15 @@ export default function AnexosSection({ servicoId, anexos: initialAnexos }: Anex
   const [deleting, setDeleting] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const TIPOS_PERMITIDOS = [
+    'application/pdf',
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ]
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -48,12 +57,21 @@ export default function AnexosSection({ servicoId, anexos: initialAnexos }: Anex
         continue
       }
 
-      const ext = file.name.split('.').pop()
-      const path = `${servicoId}/${Date.now()}-${file.name}`
+      if (!TIPOS_PERMITIDOS.includes(file.type)) {
+        toast.error(`Tipo de arquivo não permitido: ${file.name}`)
+        continue
+      }
+
+      // Sanitiza o nome do arquivo: remove caracteres especiais
+      const nomeSeguro = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `${servicoId}/${Date.now()}-${nomeSeguro}`
+
+      // Usa o MIME type real detectado pelo browser, não o declarado pelo servidor
+      const tipoSeguro = TIPOS_PERMITIDOS.includes(file.type) ? file.type : 'application/octet-stream'
 
       const { error: uploadError } = await supabase.storage
         .from('anexos')
-        .upload(path, file, { contentType: file.type })
+        .upload(path, file, { contentType: tipoSeguro })
 
       if (uploadError) {
         toast.error(`Erro ao enviar ${file.name}.`)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// GET: público — apenas leitura da configuração da landing page
 export async function GET() {
   try {
     const supabase = await createClient()
@@ -14,11 +15,11 @@ export async function GET() {
   }
 }
 
+// POST: protegido — apenas usuários autenticados podem alterar a landing
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // Verifica autenticação — apenas usuários logados podem alterar a landing
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -37,17 +38,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('[landing/route] POST error:', err)
-    return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  })
 }
