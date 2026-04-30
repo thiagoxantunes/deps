@@ -141,11 +141,16 @@
     .steps-phone-btn .ph-icon svg { width:18px; height:18px; }
     .steps-phone-btn .ph-sub { font-size:.7rem; color:var(--muted); font-weight:400; display:block; }
 
-    /* ── CTA BANNER ── */
-    #cta-banner { background:var(--yellow); padding:5rem 5%; text-align:center; }
-    #cta-banner h2 { font-family:'Montserrat',sans-serif; font-size:clamp(1.75rem,4vw,3rem); font-weight:900; color:var(--black); margin-bottom:1rem; letter-spacing:-.5px; }
-    #cta-banner p { font-size:1.05rem; color:rgba(0,0,0,.65); margin-bottom:2rem; }
-    #cta-banner .cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    /* ── CTA BANNER / CAROUSEL ── */
+    #cta-banner { background:var(--yellow); padding:5rem 5%; text-align:center; overflow:hidden; }
+    .cta-car-wrap { max-width:720px; margin:0 auto; }
+    .cta-car-eyebrow { display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(0,0,0,.5); margin-bottom:.75rem; }
+    .cta-car-headline { font-family:'Montserrat',sans-serif; font-size:clamp(1.75rem,4vw,2.8rem); font-weight:900; color:var(--black); margin-bottom:.9rem; letter-spacing:-.5px; line-height:1.15; }
+    .cta-car-sub { font-size:1.05rem; color:rgba(0,0,0,.65); margin-bottom:2rem; line-height:1.6; }
+    .cta-car-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:2rem; }
+    .cta-dots { display:flex; gap:.5rem; justify-content:center; }
+    .cta-dot { width:8px; height:8px; border-radius:50%; background:rgba(0,0,0,.18); border:none; cursor:pointer; padding:0; transition:background .25s,transform .25s; flex-shrink:0; }
+    .cta-dot.active { background:rgba(0,0,0,.55); transform:scale(1.3); }
 
     /* ── CONTACT ── */
     #contato { background:var(--surface); border-top:1px solid var(--border); }
@@ -565,16 +570,24 @@
   </div>
 </section>
 
-<!-- ── CTA BANNER ── -->
+<!-- ── CTA BANNER / CAROUSEL ── -->
 <section id="cta-banner">
-  <h2 class="reveal" id="cta-title">Comprou ou vendeu seu veículo?<br/>A transferência é urgente.</h2>
-  <p class="reveal" id="cta-sub">Não corra risco de ser multado. Resolva hoje mesmo com a Antunes Assessoria.</p>
-  <div class="cta-btns reveal">
-    <a id="cta-wa-btn" href="#" target="_blank" class="btn btn-black btn-lg">
-      <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-      Falar no WhatsApp agora
-    </a>
-    <a href="#contato" class="btn btn-outline btn-lg" style="border-color:rgba(0,0,0,.2);color:var(--black);">Preencher formulário</a>
+  <div class="cta-car-wrap">
+    <span class="cta-car-eyebrow" id="cta-car-eyebrow"></span>
+    <h2 class="cta-car-headline" id="cta-car-headline"></h2>
+    <p class="cta-car-sub" id="cta-car-sub"></p>
+    <div class="cta-car-btns">
+      <a id="cta-wa-btn" href="#" target="_blank" class="btn btn-black btn-lg" style="display:none">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Falar no WhatsApp agora
+      </a>
+      <button id="cta-car-btn" class="btn btn-black btn-lg" onclick="ctaWaClick()">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.278 7.048L.786 23.214l4.276-1.373A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.32-.641-6.077-1.748l-.434-.264-2.543.817.845-2.485-.285-.452C2.633 16.145 2 14.15 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <span id="cta-car-btn-label">Falar no WhatsApp agora</span>
+      </button>
+      <a href="#contato" class="btn btn-outline btn-lg" style="border-color:rgba(0,0,0,.2);color:var(--black);">Preencher formulário</a>
+    </div>
+    <div class="cta-dots" id="cta-dots"></div>
   </div>
 </section>
 
@@ -892,6 +905,16 @@
     document.querySelectorAll('.reveal,[data-ah]').forEach(function(el){
       el.style.opacity='1'; el.style.transform='none';
     });
+    // Carousel: preenche primeiro slide sem animação
+    var s0 = { eye:'🚨 Multa no correio?', h:'Não aceite calado — nós entramos com o recurso!', sub:'Fazemos o processo de defesa administrativo por você. Rápido, sem burocracia.', cta:'Recorrer agora' };
+    var fbIds = { 'cta-car-eyebrow':s0.eye, 'cta-car-headline':s0.h, 'cta-car-sub':s0.sub, 'cta-car-btn-label':s0.cta };
+    Object.keys(fbIds).forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.textContent=fbIds[id];el.style.opacity='1';el.style.transform='none';}
+    });
+    var fbBtn=document.getElementById('cta-car-btn');
+    if(fbBtn){fbBtn.style.opacity='1';fbBtn.style.transform='none';}
+    window.ctaWaClick=function(){window.open('https://wa.me/5522999020699?text='+encodeURIComponent('Olá! Quero mais informações.'),'_blank');};
   };
   document.head.appendChild(s);
 })();
@@ -1004,24 +1027,176 @@ function initAnime() {
     }, 100);
   }
 
-  /* ── 9. CTA BANNER — elastic scale reveal ── */
-  var ctaObs = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (!e.isIntersecting) return;
-      anime({ targets:'#cta-banner h2', opacity:[0,1], scale:[0.9,1], translateY:[20,0], duration:800, easing:'easeOutBack' });
-      anime({ targets:'#cta-banner p',  opacity:[0,1], translateY:[16,0], duration:700, delay:150, easing:'easeOutExpo' });
-      anime({ targets:'#cta-banner .cta-btns .btn', opacity:[0,1], translateY:[20,0], scale:[0.9,1],
-              delay:anime.stagger(120,{start:250}), duration:600, easing:'spring(1,80,10,0)' });
-      ctaObs.disconnect();
+  /* ── 9. CTA BANNER — carousel ── */
+  var CTA_SLIDES = [
+    {
+      eye: '🚨 Multa no correio?',
+      h: 'Não aceite calado — nós entramos com o recurso!',
+      sub: 'Fazemos o processo de defesa administrativo por você. Rápido, sem burocracia.',
+      cta: 'Recorrer agora',
+    },
+    {
+      eye: '🔄 Transferência de veículo',
+      h: 'Comprou ou vendeu? A transferência é urgente!',
+      sub: 'Multas continuam chegando para quem está no documento. Regularize agora.',
+      cta: 'Transferir agora',
+    },
+    {
+      eye: '📋 Licenciamento anual',
+      h: 'Seu CRLV está vencido?',
+      sub: 'Circule sem medo. Regularize sem filas e sem estresse — tudo pelo WhatsApp.',
+      cta: 'Licenciar agora',
+    },
+    {
+      eye: '📄 Documento perdido?',
+      h: 'Perdeu o CRV ou CRLV?',
+      sub: 'Emitimos a segunda via com agilidade. Sem sair de casa.',
+      cta: 'Solicitar 2ª via',
+    },
+    {
+      eye: '🏙️ Mudou de estado?',
+      h: 'Transfira o registro do seu veículo',
+      sub: 'Cuidamos de toda a documentação para transferência de jurisdição estadual.',
+      cta: 'Regularizar agora',
+    },
+    {
+      eye: '🆕 Veículo novo?',
+      h: 'Faça o primeiro emplacamento!',
+      sub: 'Primeiro licenciamento com agilidade e sem complicação.',
+      cta: 'Emplacar agora',
+    },
+  ];
+
+  var _ctaIdx = 0;
+  var _ctaTimer = null;
+  var _ctaAnimating = false;
+  var _ctaEntrance = false;
+
+  window.ctaWaClick = function() {
+    var wa = window._waData || {};
+    var num = wa.primary || '5522999020699';
+    var slide = CTA_SLIDES[_ctaIdx] || CTA_SLIDES[0];
+    var msg = encodeURIComponent('Olá! Vi no site: "' + slide.h + '". Quero mais informações.');
+    window.open('https://wa.me/' + num + '?text=' + msg, '_blank');
+  };
+
+  function _ctaDots() {
+    var dotsEl = document.getElementById('cta-dots');
+    if (!dotsEl) return;
+    dotsEl.innerHTML = '';
+    CTA_SLIDES.forEach(function(_, i) {
+      var d = document.createElement('button');
+      d.className = 'cta-dot' + (i === _ctaIdx ? ' active' : '');
+      d.setAttribute('aria-label', 'Slide ' + (i + 1));
+      d.addEventListener('click', function() { ctaGo(i); });
+      dotsEl.appendChild(d);
     });
-  }, { threshold:0.2 });
-  var ctaEl = document.getElementById('cta-banner');
-  if (ctaEl) {
-    ['#cta-banner h2','#cta-banner p','#cta-banner .cta-btns .btn'].forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(el){ el.style.opacity='0'; });
-    });
-    ctaObs.observe(ctaEl);
   }
+
+  function ctaGo(idx, noAnim) {
+    if (_ctaAnimating) return;
+    var slide = CTA_SLIDES[idx];
+    if (!slide) return;
+
+    var targets = [
+      document.getElementById('cta-car-eyebrow'),
+      document.getElementById('cta-car-headline'),
+      document.getElementById('cta-car-sub'),
+      document.getElementById('cta-car-btn'),
+    ].filter(Boolean);
+
+    if (_ctaIdx === idx && !noAnim) {
+      /* same slide — just re-entrance */
+      _ctaDoEntrance(slide, targets);
+      return;
+    }
+
+    if (noAnim) {
+      _ctaApply(slide);
+      _ctaDots();
+      return;
+    }
+
+    _ctaAnimating = true;
+    /* slide out */
+    anime({
+      targets: targets,
+      opacity: [1, 0],
+      translateY: [0, -18],
+      duration: 320,
+      delay: anime.stagger(40),
+      easing: 'easeInExpo',
+      complete: function() {
+        _ctaIdx = idx;
+        _ctaApply(slide);
+        _ctaDots();
+        _ctaDoEntrance(slide, targets);
+      },
+    });
+
+    /* reset timer */
+    if (_ctaTimer) clearInterval(_ctaTimer);
+    _ctaTimer = setInterval(function() {
+      ctaGo((_ctaIdx + 1) % CTA_SLIDES.length);
+    }, 4500);
+  }
+
+  function _ctaApply(slide) {
+    var ey = document.getElementById('cta-car-eyebrow');
+    var he = document.getElementById('cta-car-headline');
+    var su = document.getElementById('cta-car-sub');
+    var bl = document.getElementById('cta-car-btn-label');
+    if (ey) ey.textContent = slide.eye;
+    if (he) he.textContent = slide.h;
+    if (su) su.textContent = slide.sub;
+    if (bl) bl.textContent = slide.cta;
+  }
+
+  function _ctaDoEntrance(slide, targets) {
+    targets.forEach(function(el) { el.style.opacity = '0'; el.style.transform = 'translateY(22px)'; });
+    anime({
+      targets: targets,
+      opacity: [0, 1],
+      translateY: [22, 0],
+      duration: 560,
+      delay: anime.stagger(70),
+      easing: 'easeOutExpo',
+      complete: function() { _ctaAnimating = false; },
+    });
+  }
+
+  function ctaInit() {
+    _ctaApply(CTA_SLIDES[0]);
+    _ctaDots();
+
+    var targets = [
+      document.getElementById('cta-car-eyebrow'),
+      document.getElementById('cta-car-headline'),
+      document.getElementById('cta-car-sub'),
+      document.getElementById('cta-car-btn'),
+    ].filter(Boolean);
+
+    targets.forEach(function(el) { el.style.opacity = '0'; el.style.transform = 'translateY(28px)'; });
+
+    /* entrance via IntersectionObserver */
+    var ctaObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (!e.isIntersecting || _ctaEntrance) return;
+        _ctaEntrance = true;
+        _ctaDoEntrance(CTA_SLIDES[0], targets);
+        ctaObs.disconnect();
+        /* start auto-rotate after first entrance */
+        _ctaTimer = setInterval(function() {
+          ctaGo((_ctaIdx + 1) % CTA_SLIDES.length);
+        }, 4500);
+      });
+    }, { threshold: 0.25 });
+
+    var ctaEl = document.getElementById('cta-banner');
+    if (ctaEl) ctaObs.observe(ctaEl);
+  }
+
+  ctaInit();
 }
 
 /* ── DEFAULT DATA ── */
@@ -1074,6 +1249,7 @@ function getPassword() { return localStorage.getItem('site_pwd') || 'antunes2024
 
 /* ── APPLY DATA TO PAGE ── */
 function applyData(d) {
+  window._waData = d.wa; // used by ctaWaClick()
   const msg = encodeURIComponent('Olá! Vim pelo site e gostaria de um orçamento.');
   const p = d.wa.primary, pd = d.wa.primaryDisplay;
   const s = d.wa.secondary, sd = d.wa.secondaryDisplay;
@@ -1119,9 +1295,11 @@ function applyData(d) {
     `${d.hero.line1}<br/>${d.hero.line2}<br/><span class="highlight">${d.hero.highlight}</span>`;
   document.getElementById('hero-desc').textContent = d.hero.desc;
 
-  // CTA
-  document.getElementById('cta-title').innerHTML = d.cta.title.replace(/\n/g,'<br/>');
-  document.getElementById('cta-sub').textContent = d.cta.sub;
+  // CTA (carousel — slides are hardcoded; these fields preserved for backwards compat)
+  const ctaTitleEl = document.getElementById('cta-title');
+  if (ctaTitleEl) ctaTitleEl.innerHTML = d.cta.title.replace(/\n/g,'<br/>');
+  const ctaSubEl = document.getElementById('cta-sub');
+  if (ctaSubEl) ctaSubEl.textContent = d.cta.sub;
 
   // Services grid
   renderServices(d.services);
