@@ -22,6 +22,7 @@ export async function marcarServicoPago(servicoId: string, contaId: string) {
   const updates: Record<string, unknown> = {
     pagamento_status: 'pago',
     conta_id: contaId,
+    data_pagamento: today, // sempre registra a data real do pagamento
   }
 
   // Se ainda não está concluído, conclui agora
@@ -67,7 +68,7 @@ export async function desmarcarServicoPago(servicoId: string) {
 
   const { error } = await supabase
     .from('servicos')
-    .update({ pagamento_status: 'a_receber', conta_id: null })
+    .update({ pagamento_status: 'a_receber', conta_id: null, data_pagamento: null })
     .eq('id', servicoId)
 
   if (error) throw new Error('Erro ao desmarcar pagamento')

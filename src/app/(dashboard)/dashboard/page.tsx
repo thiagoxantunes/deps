@@ -39,11 +39,11 @@ async function getStats(mes: number, ano: number) {
       .eq('status', 'concluido')
       .gte('data_conclusao', firstOfMonth)
       .lte('data_conclusao', lastOfMonth),
-    // Receita = serviços pagos no mês
+    // Receita = serviços pagos no mês (filtra por data_pagamento, não por data_conclusao)
     supabase.from('servicos').select('valor')
       .eq('pagamento_status', 'pago')
-      .gte('data_conclusao', firstOfMonth)
-      .lte('data_conclusao', lastOfMonth),
+      .gte('data_pagamento', firstOfMonth)
+      .lte('data_pagamento', lastOfMonth),
     supabase.from('servicos').select('*, cliente:clientes(nome)')
       .order('created_at', { ascending: false }).limit(5),
     supabase.from('clientes').select('id, nome, telefone, created_at')
@@ -126,10 +126,11 @@ async function getChartData() {
       const end = new Date(year, month, 0)
       const endStr = `${year}-${String(month).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`
 
-      const { data } = await supabase.from('servicos').select('valor, status')
-        .gte('data_conclusao', start).lte('data_conclusao', endStr)
+      const { data } = await supabase.from('servicos').select('valor')
+        .eq('pagamento_status', 'pago')
+        .gte('data_pagamento', start).lte('data_pagamento', endStr)
 
-      const receita = (data || []).filter(s => s.status === 'concluido').reduce((s, v) => s + (v.valor || 0), 0)
+      const receita = (data || []).reduce((s, v) => s + (v.valor || 0), 0)
       const servicos = (data || []).length
 
       return { mes: label, receita, servicos }
