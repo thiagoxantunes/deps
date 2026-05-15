@@ -12,6 +12,7 @@ import toast from 'react-hot-toast'
 import type { Servico } from '@/types'
 import { CheckCircle, Clock, DollarSign, AlertCircle, UserPlus } from 'lucide-react'
 import NovoClienteRapidoModal from '@/components/ui/NovoClienteRapidoModal'
+import SearchableSelect from '@/components/ui/SearchableSelect'
 import { revalidarServicos } from './actions'
 
 interface ServicoFormProps {
@@ -181,8 +182,8 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">Vínculo</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
+          <div className="space-y-1 relative">
+            <div className="flex items-center justify-between mb-1">
               <label htmlFor="cliente_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Cliente *
               </label>
@@ -195,18 +196,14 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
                 Cadastrar novo
               </button>
             </div>
-            <select
+            <SearchableSelect
               id="cliente_id"
+              options={clientes.map(c => ({ value: c.id, label: c.nome }))}
               value={form.cliente_id}
-              onChange={e => { set('cliente_id', e.target.value); set('veiculo_id', '') }}
-              className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.cliente_id ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
-            >
-              <option value="">Selecione o cliente</option>
-              {clientes.map(c => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
-            {errors.cliente_id && <p className="text-xs text-red-500">{errors.cliente_id}</p>}
+              onChange={val => { set('cliente_id', val); set('veiculo_id', '') }}
+              placeholder="Selecione o cliente"
+              error={errors.cliente_id}
+            />
           </div>
 
           <Select
