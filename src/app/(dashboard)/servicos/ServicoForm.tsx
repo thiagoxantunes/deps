@@ -120,6 +120,7 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
 
     const tipoFinal = isCustomTipo ? tipoCustom : form.tipo_servico
     const valorNum = form.valor ? parseFloat(form.valor.replace(',', '.')) : null
+    const hoje = new Date().toISOString().split('T')[0]
 
     const data = {
       cliente_id: form.cliente_id,
@@ -133,6 +134,8 @@ export default function ServicoForm({ servico, clienteId, veiculoId }: ServicoFo
       valor: valorNum,
       forma_pagamento: null,
       conta_id: form.conta_id || null,
+      // Se marcado como pago, registra a data do pagamento (data_conclusao se preenchida, senão hoje)
+      data_pagamento: form.pagamento_status === 'pago' ? (form.data_conclusao || hoje) : null,
     }
 
     if (servico) {
