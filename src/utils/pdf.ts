@@ -283,3 +283,235 @@ export function gerarComprovanteServico(servico: ServicoPDF, cliente: ClientePDF
 
   return doc
 }
+
+// ════════════════════════════════════════════════════════════════
+// ORÇAMENTO PDF
+// ════════════════════════════════════════════════════════════════
+
+interface OrcamentoItemPDF {
+  descricao: string
+  valor: number
+}
+
+interface OrcamentoPDF {
+  numero: number
+  status: string
+  observacoes?: string | null
+  validade?: string | null
+  data_criacao: string
+  valor_total: number
+  itens: OrcamentoItemPDF[]
+}
+
+export function gerarOrcamentoPDF(orcamento: OrcamentoPDF, cliente: ClientePDF, veiculo?: { placa: string; modelo: string } | null) {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  let y = 0
+
+  // ── 1. HEADER ESCURO ────────────────────────────────────────────
+  const headerH = 48
+  doc.setFillColor(...DARK)
+  doc.rect(0, 0, PAGE_W, headerH, 'F')
+
+  doc.setFillColor(...ORANGE)
+  doc.rect(0, 0, 5, headerH, 'F')
+
+  doc.setTextColor(...WHITE)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.text('THIAGO ANTUNES', 14, 19)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...ORANGE)
+  doc.text('ASSESSORIA DE TRÂNSITO', 14, 26)
+
+  doc.setDrawColor(...GRAY_400)
+  doc.setLineWidth(0.3)
+  doc.line(115, 10, 115, 38)
+
+  doc.setTextColor(180, 186, 194)
+  doc.setFontSize(7.5)
+  doc.text('ORÇAMENTO', PAGE_W - MARGIN, 14, { align: 'right' })
+
+  doc.setTextColor(...WHITE)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.text(`Nº ${String(orcamento.numero).padStart(4, '0')}`, PAGE_W - MARGIN, 22, { align: 'right' })
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...WHITE)
+  doc.text(`Emitido em: ${formatDate(orcamento.data_criacao.split('T')[0])}`, PAGE_W - MARGIN, 30, { align: 'right' })
+  if (orcamento.validade) {
+    doc.text(`Validade: ${formatDate(orcamento.validade)}`, PAGE_W - MARGIN, 36, { align: 'right' })
+  }
+
+  doc.setFillColor(...ORANGE)
+  doc.rect(0, headerH, PAGE_W, 1.5, 'F')
+
+  y = headerH + 1.5
+
+  // ── 2. TÍTULO ──────────────────────────────────────────────
+  y += 10
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(...DARK)
+  doc.text('PROPOSTA COMERCIAL', MARGIN, y)
+
+  y += 8
+
+  // ── 3. DADOS DO CLIENTE ────────────────────────────────────
+  const sectionHeaderH = 8
+  const clienteFields: [string, string][] = [
+    ['Nome', cliente.nome],
+    ...(cliente.cpf_cnpj ? [['CPF/CNPJ', cliente.cpf_cnpj] as [string, string]] : []),
+    ...(cliente.telefone ? [['Telefone', cliente.telefone] as [string, string]] : []),
+    ...(cliente.email ? [['E-mail', cliente.email] as [string, string]] : []),
+    ...(veiculo ? [['Veículo', `${veiculo.placa} — ${veiculo.modelo}`] as [string, string]] : []),
+  ]
+  const clienteH = sectionHeaderH + clienteFields.length * 6 + 8
+  drawSection(doc, MARGIN, y, CONTENT, clienteH, GRAY_100)
+
+  doc.setFillColor(...ORANGE)
+  doc.roundedRect(MARGIN, y, CONTENT, sectionHeaderH, 2, 2, 'F')
+  doc.rect(MARGIN, y + sectionHeaderH / 2, CONTENT, sectionHeaderH / 2, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(...WHITE)
+  doc.text('DADOS DO CLIENTE', MARGIN + 4, y + 5.5)
+
+  y += sectionHeaderH + 5
+  clienteFields.forEach(([label, value]) => {
+    drawField(doc, MARGIN + 4, y, label, value)
+    y += 6
+  })
+  y += 6
+
+  // ── 4. TABELA DE ITENS ─────────────────────────────────────
+  doc.setFillColor(...DARK)
+  doc.roundedRect(MARGIN, y, CONTENT, sectionHeaderH, 2, 2, 'F')
+  doc.rect(MARGIN, y + sectionHeaderH / 2, CONTENT, sectionHeaderH / 2, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(...WHITE)
+  doc.text('ITENS DO ORÇAMENTO', MARGIN + 4, y + 5.5)
+  y += sectionHeaderH
+
+  // Cabeçalho da tabela
+  doc.setFillColor(245, 246, 248)
+  doc.rect(MARGIN, y, CONTENT, 7, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(...GRAY_400)
+  doc.text('DESCRIÇÃO', MARGIN + 4, y + 4.8)
+  doc.text('VALOR', PAGE_W - MARGIN - 4, y + 4.8, { align: 'right' })
+  y += 7
+
+  // Linhas
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9.5)
+  doc.setTextColor(...GRAY_900)
+  orcamento.itens.forEach((item, idx) => {
+    const linhas = doc.splitTextToSize(item.descricao, CONTENT - 50)
+    const rowH = Math.max(8, linhas.length * 5)
+
+    if (idx % 2 === 1) {
+      doc.setFillColor(250, 251, 252)
+      doc.rect(MARGIN, y, CONTENT, rowH, 'F')
+    }
+
+    doc.setTextColor(...GRAY_900)
+    doc.text(linhas, MARGIN + 4, y + 5)
+    doc.setFont('helvetica', 'bold')
+    doc.text(formatCurrency(item.valor), PAGE_W - MARGIN - 4, y + 5, { align: 'right' })
+    doc.setFont('helvetica', 'normal')
+
+    y += rowH
+
+    // Linha separadora fina
+    doc.setDrawColor(...DIVIDER)
+    doc.setLineWidth(0.2)
+    doc.line(MARGIN, y, PAGE_W - MARGIN, y)
+  })
+
+  y += 6
+
+  // ── 5. BLOCO TOTAL ─────────────────────────────────────────
+  const totalH = 18
+  drawSection(doc, MARGIN, y, CONTENT, totalH, [255, 247, 237])
+
+  doc.setDrawColor(...ORANGE)
+  doc.setLineWidth(0.6)
+  doc.line(MARGIN, y, MARGIN, y + totalH)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  doc.setTextColor(...DARK)
+  doc.text('VALOR TOTAL', MARGIN + 5, y + 11)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(16)
+  doc.setTextColor(...ORANGE)
+  doc.text(formatCurrency(orcamento.valor_total), PAGE_W - MARGIN - 5, y + 11.5, { align: 'right' })
+
+  y += totalH + 4
+
+  // ── 6. OBSERVAÇÕES ─────────────────────────────────────────
+  if (orcamento.observacoes) {
+    y += 6
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(...GRAY_400)
+    doc.text('OBSERVAÇÕES / CONDIÇÕES', MARGIN, y)
+    y += 5
+
+    doc.setDrawColor(...DIVIDER)
+    doc.setLineWidth(0.3)
+    doc.line(MARGIN, y, PAGE_W - MARGIN, y)
+    y += 4
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...GRAY_900)
+    const lines = doc.splitTextToSize(orcamento.observacoes, CONTENT)
+    doc.text(lines, MARGIN, y)
+    y += lines.length * 5
+  }
+
+  // ── 7. ASSINATURAS ─────────────────────────────────────────
+  const sigY = Math.max(y + 20, PAGE_H - 55)
+  doc.setDrawColor(...DIVIDER)
+  doc.setLineWidth(0.4)
+  const sigW = (CONTENT - 16) / 2
+  doc.line(MARGIN, sigY, MARGIN + sigW, sigY)
+  doc.line(PAGE_W - MARGIN - sigW, sigY, PAGE_W - MARGIN, sigY)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(7.5)
+  doc.setTextColor(...GRAY_400)
+  doc.text('Assinatura do Responsável', MARGIN + sigW / 2, sigY + 4, { align: 'center' })
+  doc.text('Aceite do Cliente', PAGE_W - MARGIN - sigW / 2, sigY + 4, { align: 'center' })
+
+  // ── 8. RODAPÉ ──────────────────────────────────────────────
+  doc.setFillColor(...ORANGE)
+  doc.rect(0, PAGE_H - 16, PAGE_W, 16, 'F')
+
+  doc.setFillColor(...DARK)
+  doc.rect(0, PAGE_H - 17, PAGE_W, 1, 'F')
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(...WHITE)
+  doc.text('THIAGO ANTUNES — Assessoria de Trânsito', MARGIN, PAGE_H - 9)
+
+  const now = new Date()
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(7)
+  doc.setTextColor(255, 237, 213)
+  doc.text(
+    `Orçamento Nº ${String(orcamento.numero).padStart(4, '0')} • Gerado em ${now.toLocaleDateString('pt-BR')}`,
+    PAGE_W - MARGIN, PAGE_H - 9, { align: 'right' }
+  )
+
+  return doc
+}

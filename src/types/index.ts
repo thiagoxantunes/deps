@@ -145,3 +145,33 @@ export interface NotificacaoItem {
   diasRestantes: number
   valor?: number
 }
+
+export type OrcamentoStatus = 'rascunho' | 'enviado' | 'aprovado' | 'recusado' | 'expirado'
+
+export interface OrcamentoItem {
+  id: string
+  orcamento_id: string
+  descricao: string
+  valor: number
+  ordem: number
+  created_at: string
+}
+
+export interface Orcamento {
+  id: string
+  numero: number
+  cliente_id: string
+  veiculo_id?: string | null
+  status: OrcamentoStatus
+  valor_total: number
+  observacoes?: string | null
+  validade?: string | null
+  data_aprovacao?: string | null
+  data_recusa?: string | null
+  servico_id?: string | null
+  created_at: string
+  updated_at: string
+  cliente?: Cliente | { id: string; nome: string; telefone?: string }
+  veiculo?: Veiculo | { id: string; placa: string; modelo: string }
+  itens?: OrcamentoItem[]
+}

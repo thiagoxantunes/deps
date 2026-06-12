@@ -74,6 +74,22 @@ export const TAG_COLORS: Record<string, string> = {
   novo: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 }
 
+export const ORCAMENTO_STATUS_LABELS: Record<string, string> = {
+  rascunho: 'Rascunho',
+  enviado: 'Enviado',
+  aprovado: 'Aprovado',
+  recusado: 'Recusado',
+  expirado: 'Expirado',
+}
+
+export const ORCAMENTO_STATUS_COLORS: Record<string, string> = {
+  rascunho: 'bg-gray-100 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300',
+  enviado: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  aprovado: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+  recusado: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  expirado: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+}
+
 export const STATUS_LABELS: Record<string, string> = {
   em_andamento: 'Em Andamento',
   concluido: 'Concluído',
