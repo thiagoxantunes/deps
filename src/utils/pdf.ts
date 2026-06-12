@@ -387,54 +387,38 @@ export function gerarOrcamentoPDF(orcamento: OrcamentoPDF, cliente: ClientePDF, 
   })
   y += 6
 
-  // ── 4. TABELA DE ITENS ─────────────────────────────────────
+  // ── 4. LISTA DE SERVIÇOS ───────────────────────────────────
   doc.setFillColor(...DARK)
   doc.roundedRect(MARGIN, y, CONTENT, sectionHeaderH, 2, 2, 'F')
   doc.rect(MARGIN, y + sectionHeaderH / 2, CONTENT, sectionHeaderH / 2, 'F')
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(8)
   doc.setTextColor(...WHITE)
-  doc.text('ITENS DO ORÇAMENTO', MARGIN + 4, y + 5.5)
-  y += sectionHeaderH
+  doc.text('SERVIÇOS INCLUSOS', MARGIN + 4, y + 5.5)
+  y += sectionHeaderH + 4
 
-  // Cabeçalho da tabela
-  doc.setFillColor(245, 246, 248)
-  doc.rect(MARGIN, y, CONTENT, 7, 'F')
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(8)
-  doc.setTextColor(...GRAY_400)
-  doc.text('DESCRIÇÃO', MARGIN + 4, y + 4.8)
-  doc.text('VALOR', PAGE_W - MARGIN - 4, y + 4.8, { align: 'right' })
-  y += 7
-
-  // Linhas
+  // Lista de descrições (sem valor por item)
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9.5)
+  doc.setFontSize(10)
   doc.setTextColor(...GRAY_900)
-  orcamento.itens.forEach((item, idx) => {
-    const linhas = doc.splitTextToSize(item.descricao, CONTENT - 50)
-    const rowH = Math.max(8, linhas.length * 5)
+  orcamento.itens.forEach((item) => {
+    const linhas = doc.splitTextToSize(item.descricao, CONTENT - 12)
+    const rowH = Math.max(7, linhas.length * 5.5)
 
-    if (idx % 2 === 1) {
-      doc.setFillColor(250, 251, 252)
-      doc.rect(MARGIN, y, CONTENT, rowH, 'F')
-    }
+    // Bullet laranja
+    doc.setFillColor(...ORANGE)
+    doc.circle(MARGIN + 3, y + 3, 1.2, 'F')
 
     doc.setTextColor(...GRAY_900)
-    doc.text(linhas, MARGIN + 4, y + 5)
-    doc.setFont('helvetica', 'bold')
-    doc.text(formatCurrency(item.valor), PAGE_W - MARGIN - 4, y + 5, { align: 'right' })
-    doc.setFont('helvetica', 'normal')
-
+    doc.text(linhas, MARGIN + 8, y + 4)
     y += rowH
-
-    // Linha separadora fina
-    doc.setDrawColor(...DIVIDER)
-    doc.setLineWidth(0.2)
-    doc.line(MARGIN, y, PAGE_W - MARGIN, y)
   })
 
-  y += 6
+  y += 4
+  doc.setDrawColor(...DIVIDER)
+  doc.setLineWidth(0.3)
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y)
+  y += 4
 
   // ── 5. BLOCO TOTAL ─────────────────────────────────────────
   const totalH = 18
