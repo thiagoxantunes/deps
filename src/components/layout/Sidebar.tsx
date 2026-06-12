@@ -3,7 +3,7 @@
 import { cn } from '@/utils/cn'
 import {
   LayoutDashboard, Users, Car, FileText, Search,
-  LogOut, Moon, Sun, Menu, X, ChevronRight, BarChart2, RefreshCw, MessageCircle, Wallet, TrendingDown, Globe, ClipboardList
+  LogOut, Moon, Sun, Menu, X, ChevronRight, BarChart2, RefreshCw, MessageCircle, Wallet, TrendingDown, Globe, ClipboardList, List
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/veiculos', icon: Car, label: 'Veículos' },
   { href: '/servicos', icon: FileText, label: 'Serviços' },
   { href: '/orcamentos', icon: ClipboardList, label: 'Orçamentos' },
+  { href: '/catalogo', icon: List, label: 'Catálogo' },
   { href: '/saidas', icon: TrendingDown, label: 'Saídas' },
   { href: '/contas', icon: Wallet, label: 'Contas' },
   { href: '/recorrentes', icon: RefreshCw, label: 'Recorrentes' },

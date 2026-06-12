@@ -9,7 +9,7 @@ import Select from '@/components/ui/Select'
 import Textarea from '@/components/ui/Textarea'
 import SearchableSelect from '@/components/ui/SearchableSelect'
 import NovoClienteRapidoModal from '@/components/ui/NovoClienteRapidoModal'
-import { Plus, Trash2, UserPlus, Calendar, DollarSign } from 'lucide-react'
+import { Plus, Trash2, UserPlus, Calendar, DollarSign, List, X, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { formatCurrency } from '@/utils/cn'
 import { criarOrcamento, atualizarOrcamento } from './actions'
@@ -24,6 +24,12 @@ interface ItemForm {
   valor: string // mantido como string no form, convertido na hora de salvar
 }
 
+interface ItemCatalogo {
+  id: string
+  nome: string
+  valor_padrao: number
+}
+
 export default function OrcamentoForm({ orcamento }: OrcamentoFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -31,6 +37,9 @@ export default function OrcamentoForm({ orcamento }: OrcamentoFormProps) {
   const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([])
   const [veiculos, setVeiculos] = useState<{ id: string; placa: string; modelo: string }[]>([])
   const [modalClienteOpen, setModalClienteOpen] = useState(false)
+  const [catalogo, setCatalogo] = useState<ItemCatalogo[]>([])
+  const [pickerAberto, setPickerAberto] = useState<number | null>(null)
+  const [pickerBusca, setPickerBusca] = useState('')
 
   const [form, setForm] = useState({
     cliente_id: orcamento?.cliente_id || '',
@@ -52,6 +61,12 @@ export default function OrcamentoForm({ orcamento }: OrcamentoFormProps) {
     supabase.from('clientes').select('id, nome').order('nome').then(({ data }) => {
       if (data) setClientes(data)
     })
+    supabase.from('catalogo_servicos')
+      .select('id, nome, valor_padrao')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true })
+      .order('nome', { ascending: true })
+      .then(({ data }) => { if (data) setCatalogo(data) })
   }, [])
 
   useEffect(() => {
@@ -87,6 +102,19 @@ export default function OrcamentoForm({ orcamento }: OrcamentoFormProps) {
       setErrors(prev => ({ ...prev, [`item_${idx}_${field}`]: '' }))
     }
   }
+
+  const escolherDoCatalogo = (idx: number, item: ItemCatalogo) => {
+    setItens(prev => prev.map((it, i) =>
+      i === idx ? { descricao: item.nome, valor: String(item.valor_padrao) } : it
+    ))
+    setPickerAberto(null)
+    setPickerBusca('')
+    setErrors(prev => ({ ...prev, [`item_${idx}_descricao`]: '', [`item_${idx}_valor`]: '' }))
+  }
+
+  const catalogoFiltrado = catalogo.filter(c =>
+    c.nome.toLowerCase().includes(pickerBusca.toLowerCase())
+  )
 
   const parseValor = (s: string) => {
     const n = parseFloat(s.replace(/[^0-9,.]/g, '').replace(',', '.'))
@@ -214,36 +242,97 @@ export default function OrcamentoForm({ orcamento }: OrcamentoFormProps) {
 
           <div className="space-y-3">
             {itens.map((item, idx) => (
-              <div key={idx} className="grid grid-cols-12 gap-2 items-start p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/20">
-                <div className="col-span-12 sm:col-span-7">
-                  <Input
-                    id={`desc_${idx}`}
-                    placeholder="Ex: Recurso de multa, Transferência de veículo..."
-                    value={item.descricao}
-                    onChange={e => updateItem(idx, 'descricao', e.target.value)}
-                    error={errors[`item_${idx}_descricao`]}
-                  />
-                </div>
-                <div className="col-span-10 sm:col-span-4">
-                  <Input
-                    id={`valor_${idx}`}
-                    type="text"
-                    placeholder="R$ 0,00"
-                    value={item.valor}
-                    onChange={e => updateItem(idx, 'valor', e.target.value.replace(/[^0-9,.]/g, ''))}
-                    error={errors[`item_${idx}_valor`]}
-                  />
-                </div>
-                <div className="col-span-2 sm:col-span-1 flex items-start pt-1.5">
+              <div key={idx} className="p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/20 space-y-2">
+                {/* Botão "Do catálogo" */}
+                <div className="relative">
                   <button
                     type="button"
-                    onClick={() => removeItem(idx)}
-                    disabled={itens.length === 1}
-                    title="Remover item"
-                    className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    onClick={() => {
+                      setPickerAberto(pickerAberto === idx ? null : idx)
+                      setPickerBusca('')
+                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 dark:hover:bg-orange-900/20 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <List className="w-3.5 h-3.5" />
+                    Escolher do catálogo
                   </button>
+
+                  {pickerAberto === idx && (
+                    <div className="absolute z-30 mt-1 left-0 right-0 sm:right-auto sm:min-w-[26rem] sm:max-w-[90vw] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg overflow-hidden">
+                      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                        <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <input
+                          autoFocus
+                          type="text"
+                          value={pickerBusca}
+                          onChange={e => setPickerBusca(e.target.value)}
+                          placeholder="Pesquisar serviço..."
+                          className="flex-1 text-sm bg-transparent outline-none text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                        />
+                        <button type="button" onClick={() => { setPickerAberto(null); setPickerBusca('') }}>
+                          <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                        </button>
+                      </div>
+                      <ul className="max-h-64 overflow-y-auto py-1">
+                        {catalogoFiltrado.length === 0 ? (
+                          <li className="px-4 py-6 text-sm text-gray-400 text-center">
+                            {catalogo.length === 0
+                              ? <>Catálogo vazio. <a href="/catalogo" className="text-orange-600 hover:underline">Adicionar itens →</a></>
+                              : 'Nenhum resultado'}
+                          </li>
+                        ) : (
+                          catalogoFiltrado.map(c => (
+                            <li
+                              key={c.id}
+                              onClick={() => escolherDoCatalogo(idx, c)}
+                              className="px-4 py-2.5 text-sm cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 text-gray-800 dark:text-gray-200 flex items-center justify-between gap-3"
+                            >
+                              <span className="font-medium truncate">{c.nome}</span>
+                              <span className={`text-xs font-semibold whitespace-nowrap ${c.valor_padrao > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 italic'}`}>
+                                {c.valor_padrao > 0
+                                  ? c.valor_padrao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                                  : 'sem valor'}
+                              </span>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Inputs do item */}
+                <div className="grid grid-cols-12 gap-2 items-start">
+                  <div className="col-span-12 sm:col-span-7">
+                    <Input
+                      id={`desc_${idx}`}
+                      placeholder="Ex: Recurso de multa, Transferência de veículo..."
+                      value={item.descricao}
+                      onChange={e => updateItem(idx, 'descricao', e.target.value)}
+                      error={errors[`item_${idx}_descricao`]}
+                    />
+                  </div>
+                  <div className="col-span-10 sm:col-span-4">
+                    <Input
+                      id={`valor_${idx}`}
+                      type="text"
+                      placeholder="R$ 0,00"
+                      value={item.valor}
+                      onChange={e => updateItem(idx, 'valor', e.target.value.replace(/[^0-9,.]/g, ''))}
+                      error={errors[`item_${idx}_valor`]}
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1 flex items-start pt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => removeItem(idx)}
+                      disabled={itens.length === 1}
+                      title="Remover item"
+                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

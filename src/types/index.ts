@@ -146,6 +146,17 @@ export interface NotificacaoItem {
   valor?: number
 }
 
+export interface CatalogoServico {
+  id: string
+  nome: string
+  descricao?: string | null
+  valor_padrao: number
+  ativo: boolean
+  ordem: number
+  created_at: string
+  updated_at: string
+}
+
 export type OrcamentoStatus = 'rascunho' | 'enviado' | 'aprovado' | 'recusado' | 'expirado'
 
 export interface OrcamentoItem {
